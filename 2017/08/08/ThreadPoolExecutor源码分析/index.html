@@ -98,19 +98,19 @@
 <meta name="keywords" content="Java源码">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ThreadPoolExecutor源码分析">
-<meta property="og:url" content="https://lanxing.github.io/2017/08/08/ThreadPoolExecutor源码分析/index.html">
+<meta property="og:url" content="http://lanxinglan.cn/2017/08/08/ThreadPoolExecutor源码分析/index.html">
 <meta property="og:site_name" content="蓝星的博客">
 <meta property="og:description" content="引言  线程是程序执行的最小单元，合理的使用线程可以充分利用系统资源、提高吞吐率以及加快响应时间。然而在实际应用中，很多线程都是朝生夕死的。而创建和销毁线程又极大的耗费系统资源，因此从jdk1.5开始引入了线程池的概念，用户可以使用Executors静态工厂类来创建各种各样的满足自己的需求的线程池。一般来说最常用的线程池主要有以下三种:  ThreadPoolExecutor：基础多任务线程池框架">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://lanxing.github.io/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor1.png">
-<meta property="og:image" content="https://lanxing.github.io/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor2.png">
-<meta property="og:image" content="https://lanxing.github.io/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor3.png">
-<meta property="og:image" content="https://lanxing.github.io/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor4.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor1.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor2.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor3.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor4.png">
 <meta property="og:updated_time" content="2017-08-16T04:15:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ThreadPoolExecutor源码分析">
 <meta name="twitter:description" content="引言  线程是程序执行的最小单元，合理的使用线程可以充分利用系统资源、提高吞吐率以及加快响应时间。然而在实际应用中，很多线程都是朝生夕死的。而创建和销毁线程又极大的耗费系统资源，因此从jdk1.5开始引入了线程池的概念，用户可以使用Executors静态工厂类来创建各种各样的满足自己的需求的线程池。一般来说最常用的线程池主要有以下三种:  ThreadPoolExecutor：基础多任务线程池框架">
-<meta name="twitter:image" content="https://lanxing.github.io/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor1.png">
+<meta name="twitter:image" content="http://lanxinglan.cn/2017/08/08/ThreadPoolExecutor源码分析/ThreadPoolExecutor1.png">
 
 
 
@@ -139,7 +139,7 @@
 
 
 
-  <link rel="canonical" href="https://lanxing.github.io/2017/08/08/ThreadPoolExecutor源码分析/"/>
+  <link rel="canonical" href="http://lanxinglan.cn/2017/08/08/ThreadPoolExecutor源码分析/"/>
 
 
 
@@ -278,7 +278,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://lanxing.github.io/2017/08/08/ThreadPoolExecutor源码分析/">
+    <link itemprop="mainEntityOfPage" href="http://lanxinglan.cn/2017/08/08/ThreadPoolExecutor源码分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="蓝星">
