@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="netty,读书笔记," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="netty是什么&amp;emsp; &amp;emsp; Nettt是一个基于Java NIO的client-server网络服务框架，人们可以利用netty快速地开发网络应用。同时netty相对于其他网络框架更加简单并且扩展性更强，这主要得益于其提供的简单易用的api将业务逻辑和网络处理代码解耦开来。能够使你更加专注于业务的实现而不需要太多关心网络底层实现。 异步设计&amp;emsp; &amp;emsp; netty所有">
+<meta name="keywords" content="netty,读书笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty in Action(一)">
+<meta property="og:url" content="https://lanxing.github.io/2017/09/11/Netty-in-Action-一/index.html">
+<meta property="og:site_name" content="蓝星的博客">
+<meta property="og:description" content="netty是什么&amp;emsp; &amp;emsp; Nettt是一个基于Java NIO的client-server网络服务框架，人们可以利用netty快速地开发网络应用。同时netty相对于其他网络框架更加简单并且扩展性更强，这主要得益于其提供的简单易用的api将业务逻辑和网络处理代码解耦开来。能够使你更加专注于业务的实现而不需要太多关心网络底层实现。 异步设计&amp;emsp; &amp;emsp; netty所有">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://lanxing.github.io/2017/09/11/Netty-in-Action-一/img1.png">
+<meta property="og:image" content="https://lanxing.github.io/2017/09/11/Netty-in-Action-一/img2.png">
+<meta property="og:updated_time" content="2017-09-13T10:05:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Netty in Action(一)">
+<meta name="twitter:description" content="netty是什么&amp;emsp; &amp;emsp; Nettt是一个基于Java NIO的client-server网络服务框架，人们可以利用netty快速地开发网络应用。同时netty相对于其他网络框架更加简单并且扩展性更强，这主要得益于其提供的简单易用的api将业务逻辑和网络处理代码解耦开来。能够使你更加专注于业务的实现而不需要太多关心网络底层实现。 异步设计&amp;emsp; &amp;emsp; netty所有">
+<meta name="twitter:image" content="https://lanxing.github.io/2017/09/11/Netty-in-Action-一/img1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://lanxing.github.io/2017/09/11/Netty-in-Action-一/"/>
+
+
+
+
+
+  <title>Netty in Action(一) | 蓝星的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">蓝星的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">蓝星</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://lanxing.github.io/2017/09/11/Netty-in-Action-一/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="蓝星">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝星的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Netty in Action(一)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-11T12:21:37+08:00">
+                2017-09-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/09/11/Netty-in-Action-一/" class="leancloud_visitors" data-flag-title="Netty in Action(一)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="netty是什么"><a href="#netty是什么" class="headerlink" title="netty是什么"></a>netty是什么</h3><p>&emsp; &emsp; Nettt是一个基于Java NIO的client-server网络服务框架，人们可以利用netty快速地开发网络应用。同时netty相对于其他网络框架更加简单并且扩展性更强，这主要得益于其提供的简单易用的api将业务逻辑和网络处理代码解耦开来。能够使你更加专注于业务的实现而不需要太多关心网络底层实现。</p>
+<h3 id="异步设计"><a href="#异步设计" class="headerlink" title="异步设计"></a>异步设计</h3><p>&emsp; &emsp; netty所有的api都是异步的。异步处理已经不是什么新鲜事了，众所周知，IO已经变为一个应用的瓶颈，而异步处理正是为了解决这个问题出现的。</p>
+<h4 id="CallBacks机制"><a href="#CallBacks机制" class="headerlink" title="CallBacks机制"></a>CallBacks机制</h4><p>&emsp; &emsp; CallBacks机制经常应用于异步处理，人们可以指定方法执行完后的回调函数，在JavaScript中，回调机制是其语言的核心。下面代码展示了如何利用回调机制处理接受数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Fetcher</span> </span>&#123;</div><div class="line">       <span class="function"><span class="keyword">void</span> <span class="title">fetchData</span><span class="params">(FetchCallback callback)</span></span>;</div><div class="line">&#125;</div><div class="line">   <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">FetchCallback</span> </span>&#123;</div><div class="line">       <span class="function"><span class="keyword">void</span> <span class="title">onData</span><span class="params">(Data data)</span></span>;</div><div class="line">       <span class="function"><span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable cause)</span></span>;</div><div class="line">&#125;</div><div class="line">   <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Worker</span> </span>&#123;</div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doWork</span><span class="params">()</span> </span>&#123;</div><div class="line">         Fetcher fetcher = ...</div><div class="line">           fetcher.fetchData(<span class="keyword">new</span> FetchCallback() &#123;</div><div class="line">               <span class="meta">@Override</span></div><div class="line">               public void onData(Data data) &#123;                             #1</div><div class="line">                   System.out.println(<span class="string">"Data received: "</span> + data);</div><div class="line">               &#125;</div><div class="line">               <span class="meta">@Override</span></div><div class="line">               public void onError(Throwable cause) &#123;                      #2</div><div class="line">                   System.err.println(<span class="string">"An error accour: "</span> + cause.getMessage());</div><div class="line">               &#125;</div><div class="line">&#125;);</div><div class="line">... &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>#1 没有出现错误，调用onData</p>
+<p>#2 出现错误信息，调用onError</p>
+<p>&emsp; &emsp; 你可以将回调函数从当前线程移植到其他线程，但是并不能保证回调函数被执行。当你将多个异步回调函数串起来的时候会形成spaghetti code(管式代码)，有些人认为这样的代码很难读，但JavaScript以及Node.js都是这种风格。</p>
+<h4 id="Futures机制"><a href="#Futures机制" class="headerlink" title="Futures机制"></a>Futures机制</h4><p>&emsp; &emsp; 异步处理使用的第二个机制是Future机制。一个Future对象只有在特定情况下才会有值，Future对象要么是调用者的返回结果，要么是一个异常。Java在java.util.concurrent包中提供了供其线程池机制使用的Future接口，例如当你使用ExecutorService.submit()提交一个Runable任务时，就可以返回一个Future对象，利用Future对象可以判断该任务是否完成。如下所示:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">ExecutorService executor = Executors.newCachedThreadPool();</div><div class="line">   Runnable task1 = <span class="keyword">new</span> Runnable() &#123;</div><div class="line">   <span class="meta">@Override</span></div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">           doSomeHeavyWork();</div><div class="line">       &#125;</div><div class="line">... &#125;</div><div class="line">   Callable&lt;Interger&gt; task2 = <span class="keyword">new</span> Callable() &#123;</div><div class="line">       <span class="meta">@Override</span></div><div class="line">       <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> </span>&#123;</div><div class="line">           <span class="keyword">return</span> doSomeHeavyWorkWithResul();</div><div class="line">       &#125;</div><div class="line">... &#125;</div><div class="line">   Future&lt;?&gt; future1 = executor.submit(task1);</div><div class="line">   Future&lt;Integer&gt; future2 = executor.submit(task2);</div><div class="line">   <span class="keyword">while</span> (!future1.isDone() || !future2.isDone()) &#123;</div><div class="line">       ...</div><div class="line">       <span class="comment">// do something else</span></div><div class="line">       ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>&emsp; &emsp; CallBacks和Future是异步处理中最常用的两种机制，实际上无法判断两种机制的优劣，而Netty则会两种都提供，你可以自由选择使用哪种机制。</p>
+<h3 id="JVM中的阻塞与非阻塞比较"><a href="#JVM中的阻塞与非阻塞比较" class="headerlink" title="JVM中的阻塞与非阻塞比较"></a>JVM中的阻塞与非阻塞比较</h3><p>&emsp; &emsp; 随着web应用的持续增长，如何提升网络应用的效率变得尤为重要。幸运的是从1.4版本开始，java提供了NIO API来供我们编写更有效率的网络应用。Java 7中又引入的NIO.2不仅仅是之前api的升级，同时也允许我们更加高效方便地编写异步代码。</p>
+<blockquote>
+<p>New or non-blocking?</p>
+<p>The N in NIO is typically thought to mean non-blocking rather than new.NIO has beenaround for so long now that nobody calls it new IO anymore. Most people refer to it as non-blocking IO</p>
+</blockquote>
+<p>​                        <img src="/2017/09/11/Netty-in-Action-一/img1.png" alt="阻塞IO" title="阻塞IO"></p>
+<p>&emsp; &emsp; 上图所示为典型的阻塞IO模式，一个线程处理一个网络连接，因此应用能够处理连接的个数是由JVM上允许建立的线程个数决定的。</p>
+<p>​                        <img src="/2017/09/11/Netty-in-Action-一/img2.png" alt="非阻塞IO" title="非阻塞IO"><br>&emsp; &emsp; 再来看下非阻塞IO模式，上图运用selector机制来处理多个连接。下面通过一个回显服务器示例来讲解非阻塞及阻塞IO的区别。</p>
+<h4 id="阻塞IO"><a href="#阻塞IO" class="headerlink" title="阻塞IO"></a>阻塞IO</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PlainEchoServer</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">serve</span><span class="params">(<span class="keyword">int</span> port)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">            final ServerSocket socket = new ServerSocket(port);              #1</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">                    final Socket clientSocket = socket.accept();             #2</div><div class="line">                    System.out.println(<span class="string">"Accepted connection from "</span> +</div><div class="line">                            clientSocket);</div><div class="line">                    new Thread(new Runnable() &#123;                              #3</div><div class="line"></div><div class="line">                        <span class="meta">@Override</span></div><div class="line">                        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                            <span class="keyword">try</span> &#123;</div><div class="line">                                BufferedReader reader = <span class="keyword">new</span> BufferedReader(</div><div class="line">                                        <span class="keyword">new</span></div><div class="line">                                                InputStreamReader(clientSocket.getInputStream()));</div><div class="line">                                PrintWriter writer = <span class="keyword">new</span> PrintWriter(clientSocket</div><div class="line">                                        .getOutputStream(), <span class="keyword">true</span>);</div><div class="line">                                while (true) &#123;                                #4</div><div class="line">                                    writer.println(reader.readLine());</div><div class="line">                                    writer.flush();</div><div class="line">                                &#125;</div><div class="line">                            &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                                e.printStackTrace();</div><div class="line">                                <span class="keyword">try</span> &#123;</div><div class="line">                                    clientSocket.close();</div><div class="line">                                &#125; <span class="keyword">catch</span> (IOException ex) &#123;</div><div class="line">                                    <span class="comment">// ignore on close</span></div><div class="line">                                &#125;</div><div class="line">                            &#125;</div><div class="line">                        &#125;</div><div class="line">                    &#125;).start();                                              #5</div><div class="line">                &#125;</div><div class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p># 1 绑定监听端口</p>
+<p># 2 阻塞至有新连接进来</p>
+<p># 3 新建线程用来处理客户端连接</p>
+<p># 4 从客户端读取数据并回写</p>
+<p># 5 启动线程</p>
+<p>&emsp; &emsp; 上述服务器代码要求每次连接进来一个请求就需要创建一个新的线程，即使使用线程池也仅能解决一时问题，不能再根本上解决问题：客户端的连接数取决于后台处理线程的个数。当连接数多时则会带来大问题。</p>
+<h4 id="非阻塞IO"><a href="#非阻塞IO" class="headerlink" title="非阻塞IO"></a>非阻塞IO</h4><p>&emsp; &emsp; 在介绍NIO之前，我们先了解一些NIO的基本知识</p>
+<h5 id="BYTEBUFFER"><a href="#BYTEBUFFER" class="headerlink" title="BYTEBUFFER"></a>BYTEBUFFER</h5><p>&emsp; &emsp; ByteBuffer在Netty中即为重要，其主要是用来缓存数据的。ByteBuffer既可以分配到堆内存中也可以分配到堆外内存。一般来说，堆外内存能够更加快速地传递给channel，但分配和释放会更耗时。新旧的NIO API对ByteBuffer提供了统一的管理。ByteBuffer能够实现无拷贝地在各个实例之间共享，同时允许对可见数据进行切片和其他操作处理。</p>
+<blockquote>
+<p>Slicing</p>
+<p>Slicing a ByteBuffer allows to create a new ByteBuffer that share the same data as the intialByteBuffer but only expose a sub-region of it. This is useful to minimize memory copies whilestill only allow access to a part of the data</p>
+</blockquote>
+<p>ByteBuffer有以下几个重要的操作</p>
+<ul>
+<li>将数据写进ByteBuffer</li>
+<li>调用ByteBuffer.flip()切换到读模式</li>
+<li>从ByteBuffer中读取数据</li>
+<li>调用ByteBuffer.clear()或者ByteBuffer.compact()来整理ByteBuffer内存</li>
+</ul>
+<p>&emsp; &emsp; 当往ByteBuffer中写数据时，ByteBuffer会通过更新buffer中write index的位置来跟踪buffer中的数据(也可以手动更新)。当需要从ByteBuffer中读取数据时，需要调用flip()来切换到读模式，flip()会将buffer的读起始位置设置为0，这样就可以读取buffer中所有数据了。</p>
+<p>&emsp; &emsp; 为了能够再次向ByteBuffer中写数据，可以将buffer模式切换到写模式并调用任意下列两个方法。</p>
+<ul>
+<li>ByteBuffer.clear()：清除ByteBuffer</li>
+<li>ByteBuffer.compact()：通过内存拷贝清除已经读过的数据</li>
+</ul>
+<p>&emsp; &emsp; ByteBuffer.compact()会将所有未读的数据拷贝到buffer的起始位置。如下所示为ByteBuffer的使用示例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">Channel inChannel = ....;</div><div class="line">ByteBuffer buf = ByteBuffer.allocate(<span class="number">48</span>);</div><div class="line"><span class="keyword">int</span> bytesRead = -<span class="number">1</span>;</div><div class="line"><span class="keyword">do</span> &#123;</div><div class="line">    bytesRead = inChannel.read(buf);			#1</div><div class="line">    <span class="keyword">if</span> (bytesRead != -<span class="number">1</span>) &#123;</div><div class="line">    buf.flip();									#2</div><div class="line">    <span class="keyword">while</span>(buf.hasRemaining())&#123;</div><div class="line">        System.out.print((char) buf.get());		#3</div><div class="line">    &#125;</div><div class="line">    buf.clear();								#4</div><div class="line">    &#125;</div><div class="line">&#125; <span class="keyword">while</span> (bytesRead != -<span class="number">1</span>);</div><div class="line">inChannel.close();</div></pre></td></tr></table></figure>
+<p>#1 从channel中读取数据到ByteBuffer</p>
+<p>#2 切换模式至读模式</p>
+<p>#3 读取buffer中的数据，每次调用一个get()会将buffer当前位置更新+1</p>
+<p>#4 切换buffer至写模式，使其可以重新写</p>
+<h5 id="使用Selector模式"><a href="#使用Selector模式" class="headerlink" title="使用Selector模式"></a>使用Selector模式</h5><p>&emsp; &emsp; Selector可以监听多个IO是否可以读/写，这样一个Selector就可以用来处理多个连接，相比于阻塞IO每个连接占用一个线程，Selector模式更加高效。</p>
+<p>通过以下几个操作就可以轻松运用Selector</p>
+<ol>
+<li>在channels上创建一个或多个Selector</li>
+<li>在channel上注册需要监听的事件，目前支持四种事件<ul>
+<li>OP_ACCEPT：socket-accept事件</li>
+<li>OP_CONNECT：socket-connect事件</li>
+<li>OP_READ：可读事件</li>
+<li>OP_WRITE：可写事件</li>
+</ul>
+</li>
+<li>channel注册后，调用Selector.select()方法阻塞直到上述注册的一个事件发生</li>
+<li>当Selector.select()返回时，可以通过SelectionKey实例获取所有可操作的事件</li>
+</ol>
+<p>&emsp; &emsp; 下面EchoServer是基于非阻塞Selector的服务器代码，运用这个版本的Server可以运用一个线程处理上千个连接。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PlainNioEchoServer</span> </span>&#123;</div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">serve</span><span class="params">(<span class="keyword">int</span> port)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">           System.out.println(<span class="string">"Listening for connections on port "</span> + port);</div><div class="line"> ServerSocketChannel serverChannel = ServerSocketChannel.open();</div><div class="line">        ServerSocket ss = serverChannel.socket();</div><div class="line">        InetSocketAddress address = <span class="keyword">new</span> InetSocketAddress(port);</div><div class="line">        ss.bind(address);                                                #1</div><div class="line">        serverChannel.configureBlocking(<span class="keyword">false</span>);</div><div class="line">Selector  selector = Selector.open();</div><div class="line">        serverChannel.register(selector, SelectionKey.OP_ACCEPT);        #2</div><div class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                selector.select();                                       #3</div><div class="line">            &#125; <span class="keyword">catch</span> (IOException ex) &#123;</div><div class="line">                ex.printStackTrace();</div><div class="line">                <span class="comment">// handle in a proper way</span></div><div class="line">                <span class="keyword">break</span>;</div><div class="line">&#125;</div><div class="line">            Set readyKeys = selector.selectedKeys();                     #4</div><div class="line">            Iterator iterator = readyKeys.iterator();</div><div class="line">            <span class="keyword">while</span> (iterator.hasNext()) &#123;</div><div class="line">                SelectionKey key = (SelectionKey) iterator.next();</div><div class="line">                iterator.remove();                                       #5</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    <span class="keyword">if</span> (key.isAcceptable()) &#123;</div><div class="line">                      ServerSocketChannel server = (ServerSocketChannel)key.channel();</div><div class="line">                      SocketChannel client = server.accept();			#6</div><div class="line">                      System.out.println(<span class="string">"Accepted connection from"</span> + client);</div><div class="line">                      client.configureBlocking(<span class="keyword">false</span>);</div><div class="line">                      client.register(selector, SelectionKey.OP_WRITE | SelectionKey.OP_READ, ByteBuffer.allocate(100));                         					  #7</div><div class="line">                    &#125;</div><div class="line">                    if (key.isReadable()) &#123;                              #8</div><div class="line">                        SocketChannel client = (SocketChannel) key.channel();</div><div class="line">                        ByteBuffer output = (ByteBuffer) key.attachment();</div><div class="line">                        client.read(output);                             #9</div><div class="line">                    &#125;</div><div class="line">                    if (key.isWritable()) &#123;                             #10</div><div class="line">                        SocketChannel client = (SocketChannel) key.channel();</div><div class="line">                        ByteBuffer output = (ByteBuffer) key.attachment();</div><div class="line">                        output.flip();</div><div class="line">                        client.write(output);                           #11</div><div class="line">                        output.compact();</div><div class="line">                    &#125;</div><div class="line">                &#125; <span class="keyword">catch</span> (IOException ex) &#123;</div><div class="line">                    key.cancel();</div><div class="line">                    <span class="keyword">try</span> &#123;</div><div class="line">                        key.channel().close();</div><div class="line">                    &#125; <span class="keyword">catch</span> (IOException cex) &#123;</div><div class="line">                   &#125;</div><div class="line">				&#125; </div><div class="line">            &#125;</div><div class="line">		&#125; </div><div class="line">      &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>#1 绑定Server的port</p>
+<p>#2 注册channel的OP_ACCEPT Selector事件，监听新连接</p>
+<p>#3 阻塞直到有新的连接事件到来</p>
+<p>#4 获取所有可操作的SelectedKey实例</p>
+<p>#5 遍历SelectedKey实例，将遍历过的去除</p>
+<p>#6 获取新的连接</p>
+<p>#7 将新的连接注册到Selector中，并监听读/写事件</p>
+<p>#8 检查SelectKey是否可读</p>
+<p>#9 读数据</p>
+<p>#10 检测是否可写</p>
+<p>#11 写数据</p>
+<p>&emsp; &emsp; 上述代码实现起来比较繁琐，新的NIO API去掉了大部分繁琐的过程，使实现起来更加简单明了</p>
+<h4 id="基于NIO-2的EchoServer"><a href="#基于NIO-2的EchoServer" class="headerlink" title="基于NIO.2的EchoServer"></a>基于NIO.2的EchoServer</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PlainNio2EchoServer</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">serve</span><span class="params">(<span class="keyword">int</span> port)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        System.out.println(<span class="string">"Listening for connections on port "</span> + port);</div><div class="line">        <span class="keyword">final</span> AsynchronousServerSocketChannel serverChannel =</div><div class="line">                AsynchronousServerSocketChannel.open();</div><div class="line">        InetSocketAddress address = <span class="keyword">new</span> InetSocketAddress(port);</div><div class="line">        serverChannel.bind(address);                                    #1</div><div class="line">        <span class="keyword">final</span> CountDownLatch latch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</div><div class="line">        serverChannel.accept(<span class="keyword">null</span>, <span class="keyword">new</span></div><div class="line">                CompletionHandler&lt;AsynchronousSocketChannel, Object&gt;() &#123;                #2</div><div class="line"></div><div class="line">                    <span class="meta">@Override</span></div><div class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">completed</span><span class="params">(<span class="keyword">final</span> AsynchronousSocketChannel channel, Object attachment)</span> </span>&#123;</div><div class="line">                        serverChannel.accept(null, this);                       #3</div><div class="line">                        ByteBuffer buffer = ByteBuffer.allocate(<span class="number">100</span>);</div><div class="line">                        channel.read(buffer, buffer,</div><div class="line">                                new EchoCompletionHandler(channel));            #4</div><div class="line">                        <span class="meta">@Override</span></div><div class="line">                        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">failed</span> <span class="params">(Throwable throwable, Object attachment)</span></span>&#123;</div><div class="line">                            <span class="keyword">try</span> &#123;</div><div class="line">                                serverChannel.close();                              #5</div><div class="line">                            &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                                <span class="comment">// ingnore on close</span></div><div class="line">                            &#125; <span class="keyword">finally</span> &#123;</div><div class="line">                                latch.countDown();</div><div class="line">                            &#125;</div><div class="line">                        &#125;</div><div class="line">                    &#125;); <span class="keyword">try</span></div><div class="line"></div><div class="line">                    &#123;</div><div class="line">                        latch.await();</div><div class="line">                    &#125; <span class="keyword">catch</span>(</div><div class="line">                    InterruptedException e)</div><div class="line"></div><div class="line">                    &#123;</div><div class="line">                        Thread.currentThread().interrupt();</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">        <span class="keyword">private</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">EchoCompletionHandler</span> <span class="keyword">implements</span></span></div><div class="line"><span class="class">                <span class="title">CompletionHandler</span>&lt;<span class="title">Integer</span>, <span class="title">ByteBuffer</span>&gt; </span>&#123;</div><div class="line">            <span class="keyword">private</span> <span class="keyword">final</span> AsynchronousSocketChannel channel;</div><div class="line"></div><div class="line">            EchoCompletionHandler(AsynchronousSocketChannel channel) &#123;</div><div class="line">                <span class="keyword">this</span>.channel = channel;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">completed</span><span class="params">(Integer result, ByteBuffer buffer)</span> </span>&#123;</div><div class="line">                buffer.flip();</div><div class="line">                channel.write(buffer, buffer, new CompletionHandler&lt;Integer,    #6</div><div class="line">                        ByteBuffer&gt;() &#123;</div><div class="line"></div><div class="line">                    <span class="meta">@Override</span></div><div class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">completed</span><span class="params">(Integer result, ByteBuffer buffer)</span> </span>&#123;</div><div class="line">                        <span class="keyword">if</span> (buffer.hasRemaining()) &#123;</div><div class="line">                            channel.write(buffer, buffer, this);            #7</div><div class="line">                        &#125; <span class="keyword">else</span> &#123;</div><div class="line">                            buffer.compact();</div><div class="line">                            channel.read(buffer, buffer,</div><div class="line">                                    EchoCompletionHandler.this);             #8</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line"></div><div class="line">                    <span class="meta">@Override</span></div><div class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">failed</span><span class="params">(Throwable exc, ByteBuffer attachment)</span> </span>&#123;</div><div class="line">                        <span class="keyword">try</span> &#123;</div><div class="line">                            channel.close();</div><div class="line">                        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                            <span class="comment">// ingnore on close</span></div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line">                &#125;);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">failed</span><span class="params">(Throwable exc, ByteBuffer attachment)</span> </span>&#123;</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    channel.close();</div><div class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                    <span class="comment">// ingnore on close</span></div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>#1 绑定Server的port</p>
+<p>#2 监听新连接到来，一旦有新的连接接入则会调用CompletionHandler</p>
+<p>#3 重新监听连接接入事件</p>
+<p>#4 在channel上触发读操作，一单有数据可读EchoCompletionHandler将会被触发</p>
+<p>#5 出现错误时关闭channel</p>
+<p>#6 注册写回调事件，通#4</p>
+<p>#7 当buffer中还有数据时再次注册写事件</p>
+<p>#8 同#4，注册CompletionHandler回调读事件</p>
+<p>&emsp; &emsp; 上述代码看起来要比之前的更加复杂，按NIO2.0自己实现了loop事件，我们在使用的时候只需要简单地注册自己感兴趣的事件即可。</p>
+<h3 id="非阻塞应用存在的问题以及Netty是如何解决的"><a href="#非阻塞应用存在的问题以及Netty是如何解决的" class="headerlink" title="非阻塞应用存在的问题以及Netty是如何解决的"></a>非阻塞应用存在的问题以及Netty是如何解决的</h3><h4 id="跨平台及兼容性问题"><a href="#跨平台及兼容性问题" class="headerlink" title="跨平台及兼容性问题"></a>跨平台及兼容性问题</h4><p>&emsp; &emsp; 非阻塞应用一般都会有跨平台问题，一个NIO应用在Linux上可以运行但在Window无法运行，同时还需要对低版本的兼容。NIO2.0只能在java7之后的版本运行，但它提供了一套统一的管理api，使其也能够在更低完本的jdk上运行，只不过有些功能受到了限制。</p>
+<h4 id="修复e-poll-bug"><a href="#修复e-poll-bug" class="headerlink" title="修复e-poll bug"></a>修复e-poll bug</h4><p>&emsp; &emsp; 在Linux系统上，Java的NIO的Selector运用的是较为高效的e-poll机制，但是当连接较少时会存在一个很严重的bug导致cpu占用率很高。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line">      <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">          int selected = selector.select();                                #1</div><div class="line">          Set&lt;SelectedKeys&gt; readyKeys = selector.selectedKeys();</div><div class="line">          Iterator iterator = readyKeys.iterator();                        #2</div><div class="line">          while (iterator.hasNext()) &#123;                                     #3</div><div class="line">                 ... 													   #4</div><div class="line">			&#125; </div><div class="line">      &#125;</div><div class="line">...</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>&emsp; &emsp; 在Linux系统中，#1处并没有阻塞，而是返回0，这样while循环会到时cpu上升到100%，即使到现在，这个问题仍然存在，不过幸运的是Netty避免了这个问题。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/netty/" rel="tag"># netty</a>
+          
+            <a href="/tags/读书笔记/" rel="tag"># 读书笔记</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/15/浅谈Java线程池/" rel="next" title="浅谈Java线程池">
+                <i class="fa fa-chevron-left"></i> 浅谈Java线程池
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/13/Netty-In-Action-二/" rel="prev" title="Netty In Action(二)">
+                Netty In Action(二) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/head.png"
+               alt="蓝星" />
+          <p class="site-author-name" itemprop="name">蓝星</p>
+           
+              <p class="site-description motion-element" itemprop="description">Welcome to my home!</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/lanxing" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#netty是什么"><span class="nav-number">1.</span> <span class="nav-text">netty是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异步设计"><span class="nav-number">2.</span> <span class="nav-text">异步设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CallBacks机制"><span class="nav-number">2.1.</span> <span class="nav-text">CallBacks机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Futures机制"><span class="nav-number">2.2.</span> <span class="nav-text">Futures机制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM中的阻塞与非阻塞比较"><span class="nav-number">3.</span> <span class="nav-text">JVM中的阻塞与非阻塞比较</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#阻塞IO"><span class="nav-number">3.1.</span> <span class="nav-text">阻塞IO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非阻塞IO"><span class="nav-number">3.2.</span> <span class="nav-text">非阻塞IO</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#BYTEBUFFER"><span class="nav-number">3.2.1.</span> <span class="nav-text">BYTEBUFFER</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用Selector模式"><span class="nav-number">3.2.2.</span> <span class="nav-text">使用Selector模式</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于NIO-2的EchoServer"><span class="nav-number">3.3.</span> <span class="nav-text">基于NIO.2的EchoServer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非阻塞应用存在的问题以及Netty是如何解决的"><span class="nav-number">4.</span> <span class="nav-text">非阻塞应用存在的问题以及Netty是如何解决的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#跨平台及兼容性问题"><span class="nav-number">4.1.</span> <span class="nav-text">跨平台及兼容性问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#修复e-poll-bug"><span class="nav-number">4.2.</span> <span class="nav-text">修复e-poll bug</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">蓝星</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Gemini
+  </a>
+</div>
+
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2141613"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("VAJcdXNHnyLYgpT1G28i0Cp8-gzGzoHsz", "NVR7XnRF7tjrjxFvf3wmi2WF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
