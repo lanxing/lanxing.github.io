@@ -94,18 +94,18 @@
 
 
 
-<meta name="description" content="Welcome to my home!">
+<meta name="description" content="第一个Netty程序本章将运用netty建立一个Echo Server和Client来熟悉Netty的特性 Echo Server一个Netty服务器包含以下两个主要部分：  Bootstrapping：用来配置服务器熟悉，包括线程及端口。 Server Handler：Server组件，包括各种如何处理新的链接等各种业务逻辑的实现  启动Server&amp;emsp; &amp;emsp; 我们通过创建一个S">
 <meta name="keywords" content="netty,读书笔记">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Netty In Action(二)">
 <meta property="og:url" content="http://lanxinglan.cn/2017/09/13/Netty-In-Action-二/index.html">
 <meta property="og:site_name" content="蓝星的博客">
-<meta property="og:description" content="Welcome to my home!">
+<meta property="og:description" content="第一个Netty程序本章将运用netty建立一个Echo Server和Client来熟悉Netty的特性 Echo Server一个Netty服务器包含以下两个主要部分：  Bootstrapping：用来配置服务器熟悉，包括线程及端口。 Server Handler：Server组件，包括各种如何处理新的链接等各种业务逻辑的实现  启动Server&amp;emsp; &amp;emsp; 我们通过创建一个S">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-13T09:25:25.000Z">
+<meta property="og:updated_time" content="2017-09-18T11:13:12.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Netty In Action(二)">
-<meta name="twitter:description" content="Welcome to my home!">
+<meta name="twitter:description" content="第一个Netty程序本章将运用netty建立一个Echo Server和Client来熟悉Netty的特性 Echo Server一个Netty服务器包含以下两个主要部分：  Bootstrapping：用来配置服务器熟悉，包括线程及端口。 Server Handler：Server组件，包括各种如何处理新的链接等各种业务逻辑的实现  启动Server&amp;emsp; &amp;emsp; 我们通过创建一个S">
 
 
 
@@ -373,7 +373,88 @@
       
 
       
-        
+        <h3 id="第一个Netty程序"><a href="#第一个Netty程序" class="headerlink" title="第一个Netty程序"></a>第一个Netty程序</h3><p>本章将运用netty建立一个Echo Server和Client来熟悉Netty的特性</p>
+<h3 id="Echo-Server"><a href="#Echo-Server" class="headerlink" title="Echo Server"></a>Echo Server</h3><p>一个Netty服务器包含以下两个主要部分：</p>
+<ul>
+<li>Bootstrapping：用来配置服务器熟悉，包括线程及端口。</li>
+<li>Server Handler：Server组件，包括各种如何处理新的链接等各种业务逻辑的实现</li>
+</ul>
+<h4 id="启动Server"><a href="#启动Server" class="headerlink" title="启动Server"></a>启动Server</h4><p>&emsp; &emsp; 我们通过创建一个ServerBootStrap实例来启动一个Server。如下面代码所示，通过配置实例的端口号，线程(事件)模型以及处理各种业务逻辑的handler来实现一个Netty Server。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EchoServer</span> </span>&#123;</div><div class="line">        <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> port;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">EchoServer</span><span class="params">(<span class="keyword">int</span> port)</span> </span>&#123;</div><div class="line">            <span class="keyword">this</span>.port = port;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">            EventLoopGroup group = <span class="keyword">new</span> NioEventLoopGroup();</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                ServerBootstrap b = <span class="keyword">new</span> ServerBootstrap();                    <span class="comment">//1</span></div><div class="line">                b.group(group)                                                <span class="comment">//2</span></div><div class="line">                        .channel(NioServerSocketChannel.class)                        <span class="comment">//2</span></div><div class="line">                        .localAddress(<span class="keyword">new</span> InetSocketAddress(port))                    <span class="comment">//2</span></div><div class="line">                        .childHandler(<span class="keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() &#123;        <span class="comment">//3</span></div><div class="line">                            <span class="meta">@Override</span></div><div class="line">                            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(SocketChannel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">                                ch.pipeline().addLast(</div><div class="line">                                        <span class="keyword">new</span> EchoServerHandler());                  <span class="comment">//4</span></div><div class="line">                            &#125;</div><div class="line">                        &#125;);</div><div class="line">                ChannelFuture f = b.bind().sync();              <span class="comment">//5</span></div><div class="line">                System.out.println(EchoServer.class.getName() + <span class="comment">//6 </span></div><div class="line">                        <span class="string">" started and listen on "</span> + f.channel()</div><div class="line">                        .localAddress());                       <span class="comment">//7 </span></div><div class="line">                f.channel().closeFuture().sync();               <span class="comment">//8</span></div><div class="line">            &#125; <span class="keyword">finally</span> &#123;                                         <span class="comment">//9</span></div><div class="line">                group.shutdownGracefully().sync();              <span class="comment">//10</span></div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">            <span class="keyword">if</span> (args.length != <span class="number">1</span>) &#123;</div><div class="line">                System.err.println(</div><div class="line">                        <span class="string">"Usage: "</span>+EchoServer.class.getSimpleName() +</div><div class="line">                   <span class="string">"&lt;port &gt;"</span>);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">int</span> port = Integer.parseInt(args[<span class="number">0</span>]);</div><div class="line">            <span class="keyword">new</span> EchoServer(port).start();</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>创建Server实例</li>
+<li>指定NIO(异步IO)协议及网络地址</li>
+<li>向channel pipline中添加handler</li>
+<li>绑定服务器，等待服务器关闭并释放资源</li>
+</ol>
+<p>&emsp; &emsp; 为了运行一个服务器，首先要创建一个ServerBootstrao实例(1)，因为我们用的是NIO传输协议，所以需要指定NioEventLoopGroup来接受并处理新的连接，指定NioServerSocketChannel作为channel的类型，同时需要设置Server绑定的InetSocketAddress才能够接受新的连接(2)</p>
+<p>&emsp; &emsp; 下一步，通过创建一个子channel(child channel， 3)来指定当一个新的连接到来时执行的动作，在这里运用了ChannelInitializer类型。由于ChannelPipeline中包含多个handler，所以我们将新建的EchoServerHandler添加到最后(4)。</p>
+<p>&emsp; &emsp; 在(5)处，通过调用sync()方法来阻塞绑定我们的Server直到成功，同样在(8)，我们阻塞调用Server的close接口，直到Server关闭，在(10)，我们可以关闭EventLoopGroup并释放包括创建的线程在内的所有资源。</p>
+<p>简化一下以上的步骤：</p>
+<ul>
+<li>创建一个用于启动Server的ServerBootstrap示例，并在后边绑定它</li>
+<li>创建一个NIOEventLoopGroup实例来处理各种事件，例如接受新连接，接受新数据，写数据等等。</li>
+<li>指定Server需要绑定的本地的InetSocketAddress</li>
+<li>创建一个childHandler来指定每一个新连接到来时需要处理的业务逻辑</li>
+<li>当上述所有步骤都完成后，调用ServerBootstrap.bind()来绑定Server。</li>
+</ul>
+<h4 id="实现业务逻辑"><a href="#实现业务逻辑" class="headerlink" title="实现业务逻辑"></a>实现业务逻辑</h4><p>&emsp; &emsp; 我们通过继承ChannelInboundHandlerAdapter并复写messageReceived方法来实现我们的接收数据并回写数据的业务逻辑。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Sharable</span></div><div class="line">   <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EchoServerHandler</span> <span class="keyword">extends</span> <span class="title">ChannelInboundHandlerAdapter</span> </span>&#123;       <span class="comment">//1</span></div><div class="line">       <span class="meta">@Override</span></div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">channelRead</span><span class="params">(ChannelHandlerContext ctx, Object msg)</span> </span>&#123;            </div><div class="line">           System.out.println(<span class="string">"Server received: "</span>+msg);</div><div class="line">           ctx.write(msg);                                                     <span class="comment">//2</span></div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="meta">@Override</span></div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">channelReadComplete</span><span class="params">(ChannelHandlerContext ctx)</span> </span>&#123;</div><div class="line">           ctx.writeAndFlush(Unpooled.EMPTY_BUFFER)</div><div class="line">                   .addListener(ChannelFutureListener.CLOSE);               <span class="comment">//3</span></div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="meta">@Override</span></div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">exceptionCaught</span><span class="params">(ChannelHandlerContext ctx,</span></span></div><div class="line"><span class="function"><span class="params">                                   Throwable cause)</span> </span>&#123;</div><div class="line">           cause.printStracktrace();                                        <span class="comment">//4</span></div><div class="line">           ctx.close();                                                     <span class="comment">//5</span></div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>Shareable注解说明该handler可以在多个channel之间共享</li>
+<li>接受新的数据并将其回写，注意在这里还未将数据“flush”到客户端</li>
+<li>将之前所有的数据flush到客户端，并关闭channel</li>
+<li>打印异常日志</li>
+<li>出现异常时关闭channel</li>
+</ol>
+<p>&emsp; &emsp; Netty的handler提供各种各样的接口“钩子”，我们可以通过复写不同的“钩子”来实现不同的业务逻辑，但这些钩子中只有channelRead是必须的。</p>
+<h4 id="拦截异常"><a href="#拦截异常" class="headerlink" title="拦截异常"></a>拦截异常</h4><p>&emsp; &emsp; 处理复写channelRead方法来实现业务逻辑外，我们可以通过复写exceptionCaught来处理Exception或者Throwable等异常。</p>
+<h3 id="实现echo-client"><a href="#实现echo-client" class="headerlink" title="实现echo client"></a>实现echo client</h3><p>一个echo client需要包括以下几个功能：</p>
+<ul>
+<li>连接到服务器</li>
+<li>写数据</li>
+<li>接受服务器传回的数据</li>
+<li>关闭连接</li>
+</ul>
+<h4 id="启动client"><a href="#启动client" class="headerlink" title="启动client"></a>启动client</h4><p>&emsp; &emsp; 启动一个client与启动一个Server较为相似，如下代码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EchoClient</span> </span>&#123;</div><div class="line">        <span class="keyword">private</span> <span class="keyword">final</span> String host;</div><div class="line">        <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> port;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">EchoClient</span><span class="params">(String host, <span class="keyword">int</span> port)</span> </span>&#123;</div><div class="line">            <span class="keyword">this</span>.host = host;</div><div class="line">            <span class="keyword">this</span>.port = port;</div><div class="line">        &#125;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">            EventLoopGroup group = <span class="keyword">new</span> NioEventLoopGroup();</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                Bootstrap b = <span class="keyword">new</span> Bootstrap();                        <span class="comment">//1</span></div><div class="line">                b.group(group)                                        <span class="comment">//2</span></div><div class="line">                        .channel(NioSocketChannel.class)                     <span class="comment">//3</span></div><div class="line">                        .remoteAddress(<span class="keyword">new</span> InetSocketAddress(host, port))    <span class="comment">//4</span></div><div class="line">                        .handler(<span class="keyword">new</span> ChannelInitializer&lt;SocketChannel&gt;() &#123;   <span class="comment">//5</span></div><div class="line">                            <span class="meta">@Override</span></div><div class="line">                            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(SocketChannel ch)</span></span></div><div class="line"><span class="function">                                    <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">                                ch.pipeline().addLast(</div><div class="line">                                        <span class="keyword">new</span> EchoClientHandler());            <span class="comment">//6</span></div><div class="line">                            &#125; &#125;);</div><div class="line">                ChannelFuture f = b.connect().sync();                 <span class="comment">//7</span></div><div class="line">                f.channel().closeFuture().sync();                     <span class="comment">//8</span></div><div class="line">            &#125; <span class="keyword">finally</span> &#123;</div><div class="line">                group.shutdownGracefully().sync();                    <span class="comment">//9</span></div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">            <span class="keyword">if</span> (args.length != <span class="number">2</span>) &#123;</div><div class="line">                System.err.println(</div><div class="line">                        <span class="string">"Usage: "</span> + EchoClient.class.getSimpleName() +</div><div class="line">                                <span class="string">" &lt;host&gt; &lt;port&gt;"</span>);</div><div class="line">                <span class="keyword">return</span>; &#125;</div><div class="line">            <span class="comment">// Parse options.</span></div><div class="line">            <span class="keyword">final</span> String host = args[<span class="number">0</span>];</div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> port = Integer.parseInt(args[<span class="number">1</span>]);</div><div class="line">            <span class="keyword">new</span> EchoClient(host, port).start();</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>创建一个bootstrap</li>
+<li>指定EventLoopGroup来处理客户端事件，运用NioEventLoopGroup</li>
+<li>指定socket channle</li>
+<li>设置需要连接的网络地址</li>
+<li>利用ChannelInitializer指定channelHandler</li>
+<li>将EchoClientHandler添加到ChannelPipeline中</li>
+<li>调用sync()方法连接到远程服务器</li>
+<li>阻塞等到连接关闭</li>
+<li>关闭bootstrap和线程池，并释放所有资源</li>
+</ol>
+<p>几个重要的步骤：</p>
+<ul>
+<li>创建Bootstrap实例</li>
+<li>创建NioEventLoopGroup并用来处理各种事件：创建新连接，读写数据等</li>
+<li>指定需要连接的服务器地址</li>
+<li>指定连接创建后调用的handler</li>
+<li>以上步骤完成后，调用Bootstrap的connect方法连接到远程服务器。</li>
+</ul>
+<h4 id="实现客户端业务逻辑"><a href="#实现客户端业务逻辑" class="headerlink" title="实现客户端业务逻辑"></a>实现客户端业务逻辑</h4><p>&emsp; &emsp; 我们通过继承SimpleChannelInboundHandlerAdapter并复写其方法来实现客户端的业务逻辑。目前，我们只需要以下三个方法即可：</p>
+<ul>
+<li>channelActive()：当客户端与服务端连接建立时调用</li>
+<li>channelRead0()：从服务端接收到数据时调用</li>
+<li>exceptionCaught()：发生异常时调用</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Sharable</span>                                                               <span class="comment">//1</span></div><div class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EchoClientHandler</span> <span class="keyword">extends</span></span></div><div class="line"><span class="class">            <span class="title">SimpleChannelInboundHandlerAdapter</span>&lt;<span class="title">ByteBuf</span>&gt; </span>&#123;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">channelActive</span><span class="params">(ChannelHandlerContext ctx)</span> </span>&#123;</div><div class="line">            ctx.write(Unpooled.copiedBuffer(<span class="string">"Netty rocks!"</span>, CharsetUtil.UTF_8); <span class="comment">//2</span></div><div class="line">        &#125;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">channelRead0</span><span class="params">(ChannelHandlerContext ctx,</span></span></div><div class="line"><span class="function"><span class="params">                                 ByteBuf in)</span> </span>&#123;</div><div class="line">            System.out.println(“Client received: “ + ByteBufUtil                <span class="comment">//3</span></div><div class="line">                    .hexDump(in.readBytes(in.readableBytes())));                </div><div class="line">        &#125;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">exceptionCaught</span><span class="params">(ChannelHandlerContext ctx,                  //<span class="number">4</span></span></span></div><div class="line"><span class="function"><span class="params">                                    Throwable cause)</span> </span>&#123;</div><div class="line">            cause.printStracktrace();</div><div class="line">            ctx.close();</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>能够在多个channel共享handler</li>
+<li>当连接建立时，向服务端发送数据</li>
+<li>调用hexdump方法打印接收到的数据</li>
+<li>打印异常</li>
+</ol>
+<p>&emsp; &emsp; 当连接建立时，channelActive方法将会被调用，并向服务端发送一条数据。当接到新的数据时channelRead0方法将会被调用，但需要注意的时客户端接收到的数据可能是不完整的，一个五字节的数据可能会分两次被传输。第一次传输连个字节，第二次传输三个字节。但在TCP协议或者其他面向流的协议来说，这种传输是可以保障顺序的。exceptionCaught被用来捕捉异常，并关闭连接。</p>
+<blockquote>
+<p>&emsp; &emsp; 或许你会疑问我们在EchoClientHandler为什么继承SimpleChannelInboundHandlerAdapter而不是像EchoServerHandler中继承ChannelInboundHandlerAdapter。最主要的原因是当你使用ChannelInboundHandlerAdapter时你需要自己释放资源，例如当使用ByteBuf时你需要调用ByteBuf.release()方法释放资源，而使用SimpleChannelInboundHandlerAdapter你不需要关心资源的释放，因为当channelRead0执行完毕时系统会自动释放资源。在Netty中，所有实现了ReferenceCounted接口的messages都会自动释放。</p>
+</blockquote>
+
       
     </div>
     
@@ -467,8 +548,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/head.png"
@@ -543,6 +633,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一个Netty程序"><span class="nav-number">1.</span> <span class="nav-text">第一个Netty程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Echo-Server"><span class="nav-number">2.</span> <span class="nav-text">Echo Server</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#启动Server"><span class="nav-number">2.1.</span> <span class="nav-text">启动Server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现业务逻辑"><span class="nav-number">2.2.</span> <span class="nav-text">实现业务逻辑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#拦截异常"><span class="nav-number">2.3.</span> <span class="nav-text">拦截异常</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现echo-client"><span class="nav-number">3.</span> <span class="nav-text">实现echo client</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#启动client"><span class="nav-number">3.1.</span> <span class="nav-text">启动client</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现客户端业务逻辑"><span class="nav-number">3.2.</span> <span class="nav-text">实现客户端业务逻辑</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
