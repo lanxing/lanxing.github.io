@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="netty,读书笔记," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="引言&amp;emsp; &amp;emsp; 本章我们将着重介绍以下几个概念，不同的是我们不会分开介绍而是通过讲解他们是如何协同工作的来帮助我们在脑海中构造一张Netty工作机制的蓝图。  Bootstrap or ServerBootstrap EventLoop EventLoopGroup ChannelPipeline Channel Future or ChannelFuture ChannelIni">
+<meta name="keywords" content="netty,读书笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty In Action(三)">
+<meta property="og:url" content="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/index.html">
+<meta property="og:site_name" content="蓝星的博客">
+<meta property="og:description" content="引言&amp;emsp; &amp;emsp; 本章我们将着重介绍以下几个概念，不同的是我们不会分开介绍而是通过讲解他们是如何协同工作的来帮助我们在脑海中构造一张Netty工作机制的蓝图。  Bootstrap or ServerBootstrap EventLoop EventLoopGroup ChannelPipeline Channel Future or ChannelFuture ChannelIni">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/img1.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/img2.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/img3.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/img4.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/img5.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/img6.png">
+<meta property="og:updated_time" content="2017-09-20T07:31:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Netty In Action(三)">
+<meta name="twitter:description" content="引言&amp;emsp; &amp;emsp; 本章我们将着重介绍以下几个概念，不同的是我们不会分开介绍而是通过讲解他们是如何协同工作的来帮助我们在脑海中构造一张Netty工作机制的蓝图。  Bootstrap or ServerBootstrap EventLoop EventLoopGroup ChannelPipeline Channel Future or ChannelFuture ChannelIni">
+<meta name="twitter:image" content="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/img1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/"/>
+
+
+
+
+
+  <title>Netty In Action(三) | 蓝星的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">蓝星的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">蓝星</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://lanxinglan.cn/2017/09/19/Netty-In-Action-三/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="蓝星">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝星的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Netty In Action(三)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-19T15:34:15+08:00">
+                2017-09-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/09/19/Netty-In-Action-三/" class="leancloud_visitors" data-flag-title="Netty In Action(三)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>&emsp; &emsp; 本章我们将着重介绍以下几个概念，不同的是我们不会分开介绍而是通过讲解他们是如何协同工作的来帮助我们在脑海中构造一张Netty工作机制的蓝图。</p>
+<ul>
+<li>Bootstrap or ServerBootstrap</li>
+<li>EventLoop</li>
+<li>EventLoopGroup</li>
+<li>ChannelPipeline</li>
+<li>Channel</li>
+<li>Future or ChannelFuture</li>
+<li>ChannelInitializer</li>
+<li>ChannelHandler</li>
+</ul>
+<h3 id="Netty速成"><a href="#Netty速成" class="headerlink" title="Netty速成"></a>Netty速成</h3><p>&emsp; &emsp; Netty应用是通过Bootstrap进行启动的，Bootstrap使配置Netty属性变得更加简单方便。为了能够支持多种协议以及处理数据，Netty使用了Handler机制，Handler主要用于处理一个或者一组特定的事件，这些事件包括数据编码或处理数据过程中的异常捕获等。</p>
+<p>&emsp; &emsp; 我们最常使用的一种Handler是直接实现ChannelInboundHandler接口，通过该Handler我们可以接受数据并对其进行处理。当我们的应用还需要响应客户端并提供一个response时，我们还需要从ChannelInboundHandler中将数据写回客户端。换句话说，我们应用的业务逻辑通常都是在ChannelInboundHandler中的。</p>
+<p>&emsp; &emsp; 当使用Netty实现一个客户端或者服务器应用时，我们需要知道如何来处理接收到或者需要发送的数据。这时就需要不同的Handler来处理数据。Netty通过ChannelInitializer来配置Handler。ChannelInitializer的作用是将ChannelHandler添加到被称作ChannelPipeline的对象中。当我们发送或者接受数据时，这些handler就会对这些数据进行处理。其实ChannelInitializer本身也是一个ChannelHandler，只不过它在将其他handler加到ChannelPipeline之后就会从其上边将自己移除。</p>
+<p>&emsp; &emsp; 所有的Netty应用都是基于ChannelPipeline，并且ChannelPipeline和EventLoop及EventLoopGroup密切相关</p>
+<p>&emsp; &emsp; EventLoop的目的是为Channel处理IO事件，一个EventLoop可以为多个Channel处理事件，而一个EventLoopGroup可以包含多个EventLoop。</p>
+<p>&emsp; &emsp; Channel代表一个网络连接或者一些能够执行IO操作的组件，因此Channel是被EventLoop管理的，后者是专门用来处理IO事件的。</p>
+<p>&emsp; &emsp; 在Netty应用中的所有IO操作都是异步执行的，例如当我们连接服务器或者收发数据时都是异步的。由于我们没法立即获取执行的数据或者不知道执行的操作是否完成，所以我们需要延迟检测操作是否执行成功或者注册一个listener来监听操作执行的结果。Netty使用Future或者ChannelFutures机制来注册listener用来监听操作是否执行成功。</p>
+<h3 id="Channels-Events-and-Input-Output-IO"><a href="#Channels-Events-and-Input-Output-IO" class="headerlink" title="Channels, Events and Input/Output (IO)"></a>Channels, Events and Input/Output (IO)</h3><p>&emsp; &emsp; Netty是一个非阻塞的，基于事件驱动的网络框架，也就是说Netty需要通过线程来处理IO事件。一提到多线程，我们首先想到的就是要保证我们写的代码线程安全，但实际上我们没有必要这么做，下图说明了Netty处理事件的机制。</p>
+<p>​                        <img src="/2017/09/19/Netty-In-Action-三/img1.png" alt="img1.png" title=""></p>
+<p>&emsp; &emsp; 由上图可知Netty中包含多个EventLoopGroup，而每个EventLoopGroup又包含多个EventLoop。实际上我们可以将EventLoop当做处理具体网络事件的线程。</p>
+<blockquote>
+<h4 id="EventLoop与Thread的关系"><a href="#EventLoop与Thread的关系" class="headerlink" title="EventLoop与Thread的关系"></a>EventLoop与Thread的关系</h4><p>EventLoop在整个生命周期中只能绑定到一个线程(a single Thread)上</p>
+</blockquote>
+<p>&emsp; &emsp; 当我们注册一个Channel时，Netty将该Channel绑定到一个EventLoop上，而EventLoop又被绑定到一个线程中，所以我们在执行IO操作时没有必要使用同步机制因为所有发生在该Channel上的IO操作都被同一个线程执行。</p>
+<p>&emsp; &emsp; 为了能够更进一步解释上图关系，我们了解一下EventLoop与EventLoopGroup的类继承关系。</p>
+<p>​                            <img src="/2017/09/19/Netty-In-Action-三/img2.png" alt="EventLoop与EventLoopGroup类关系图" title="EventLoop与EventLoopGroup类关系图"></p>
+<p>&emsp; &emsp; 我们知道EventLoopGroup可以包含多个EventLoop，但实际上EventLoop与EventLoopGroup满足“is-a”关系，也就是说EventLoop本身也是一个EventLoopGroup，所以任何可以使用EventLoopGroup的地方都可以使用一个特定的EventLoop。</p>
+<h3 id="Bootstrapping-What-and-Why"><a href="#Bootstrapping-What-and-Why" class="headerlink" title="Bootstrapping: What and Why"></a>Bootstrapping: What and Why</h3><p>&emsp; &emsp; 在Netty中Bootstrapping是用来配置Netty应用的。由上一章可知，Netty中包含两种类型的BootStrap，一种专门供客户端或者DatagramChannel使用(Bootsrap)，另一种专门供服务端使用(ServerBootstrap)。无论我们的应用使用何种协议，最终决定我们使用哪种Bootstrap的是我们是要创建一个客户端(Client)应用还是服务端(Server)应用。</p>
+<p>如下表为BootStrap与ServerBootstrap对比</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">Bootstrap</th>
+<th style="text-align:center">ServerBootstrap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">作用</td>
+<td style="text-align:center">连接远程服务器</td>
+<td style="text-align:center">绑定并监听本地端口</td>
+</tr>
+<tr>
+<td style="text-align:center">EventLoopGroup个数</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">2</td>
+</tr>
+</tbody>
+</table>
+<p>&emsp; &emsp; 我们先看一下Bootstrap与ServerBootstrap的不同之处，第一个不同之处是ServerBootstrap需要绑定到一个端口并且监听客户端连接而Bootstrap主要用于客户端连接服务器。Bootstrap最常用的方法是connect()，但我们也可以调用bind()来绑定端口并用其返回的ChannelFuture中的Channel的connect()方法完成连接。</p>
+<p>&emsp; &emsp; 第二个不同之处是比较重要的，Bootstrap只包含一个EventLoopGroup而ServerBootstrap则包含两个EventLoopGroup(两个EventLoopGroup可以使用同一个实例)。实际上ServerBootstrap中包含两种类型的channel。第一种只包含一个ServerChannel，这个ServerChannel是绑定到本地监听端口的一个socket。第二中包含了所有客户端请求的连接。如下图所示：</p>
+<p>​                                <img src="/2017/09/19/Netty-In-Action-三/img3.png" alt="img3.png" title=""></p>
+<p>&emsp; &emsp; 如图所示，EventLoopGroupA的唯一作用就是接受新的连接并将其注册到EventLoopGroupB上。Netty使用这种机制的原因是：当一个应用的请求非常大时，如果只有一个EventLoopGroup，那么当这个EventLoopGroup的EventLoop忙于处理已经建立连接IO事件时，新到来的连接就有可能会超时。而使用两个EventLoopGroup即使在qps较高的情况下也会接受所有的连接。因为接受新连接的EventLoop与处理已经建立连接的IO事件的EventLoop用的不是同一个线程。</p>
+<blockquote>
+<h4 id="EventLoopGroup和EventLoop"><a href="#EventLoopGroup和EventLoop" class="headerlink" title="EventLoopGroup和EventLoop"></a>EventLoopGroup和EventLoop</h4><p>&emsp; &emsp; EventLoopGroup可以包含多个EventLoop，根据这种关系，每一个Channel一旦被建立都会绑定到一个EventLoop上并且不会再改变。因为EventLoopGroup不会包含太多个EventLoop，所以会有很多个Channel共享一个EventLoop。也就是说如果EventLoop中的一个Channel性能比较低的话会影响所有绑定到这个EventLoop中的其他Channel。这就是Netty为什么要求所有的操作都是非阻塞的原因。</p>
+</blockquote>
+<p>&emsp; &emsp; Netty允许使用同一个EventLoopGroup同时处理IO事件并接受新的连接。如下图所示为ServerBootstrap中两个EventLoopGroup使用同一个实例的情况。</p>
+<p>​                                <img src="/2017/09/19/Netty-In-Action-三/img4.png" alt="img4.png" title=""></p>
+<h3 id="Channel-Handlers-and-Data-Flow"><a href="#Channel-Handlers-and-Data-Flow" class="headerlink" title="Channel Handlers and Data Flow"></a>Channel Handlers and Data Flow</h3><h4 id="将ChannelPipeline和handler组合在一起"><a href="#将ChannelPipeline和handler组合在一起" class="headerlink" title="将ChannelPipeline和handler组合在一起"></a>将ChannelPipeline和handler组合在一起</h4><p>&emsp; &emsp; ChannelHandler是Netty应用程序中最主要的部分，任何一个Netty应用至少包含一个ChannelHandler。ChannelHandler主要是用来处理ChannelPipeline中穿梭的数据流的。在Netty中，ChannelHandler作为一个父接口，ChannelInboundHandler及ChannelOutboundHandler继承自ChannelHandler，如下图所示：</p>
+<p>​                                <img src="/2017/09/19/Netty-In-Action-三/img5.png" alt="ChanelHandler关系图" title="ChanelHandler关系图"></p>
+<p>&emsp; &emsp; 在Netty中，数据流有两个方向，正如上图所示的流入(ChannelInboundHandler)和流出(ChannelOutboundHandler)。当数据从应用程序流向远端时我们称之为流出(outbound)，反之数据从远端流入我们的应用程序称之为流入(inbound)。</p>
+<p>&emsp; &emsp; 为了使数据从一端流向另一端，一个或多个Handler将会在同一个方向上处理这些数据。这些Handler会在应用启动时添加，并且他们添加的顺序决定了何时处理数据。</p>
+<p>&emsp; &emsp; 这些拥有特定顺序的ChannelHandler组成了所谓的ChannelPipeline。换句话说，ChannelPipeline是一系列ChannelHandler的组合。每一个ChannelHandler处理完数据后将其传送给下一个ChannelHandler直到最后一个。</p>
+<p>​                <img src="/2017/09/19/Netty-In-Action-三/img6.png" alt="ChannelPipeline示例" title="ChannelPipeline示例"></p>
+<p>&emsp; &emsp; 如上图所示，ChannelInboundHandler和ChannelOutboundHandler可以在ChannelPipeline中混排。在上图ChannelPipeline中，如果读取一条数据或者一个流入事件，将会在ChannelPipeline的头部将该条信息传输给第一个ChannelInboundHandler。这个ChannelInboundHandler会处理该事件并将其传输给CHannelPipeline中的下一个ChannelInboundHandler。当传输到最后一个ChannelInboundHandler时也就到达了ChannelPipeline的尾部，也就意味着所有的操作都完成了。</p>
+<p>&emsp; &emsp; 反过来，所有输出事件都是从ChannelPipeline的尾部开始的，经过ChannelOutboundHandler传输直到ChannelPipeline头部。</p>
+<p>&emsp; &emsp; 既然在ChannelPipeline中ChannelInboundHandler和ChannelOutboundHandler是混合在一起的，那他们是如何区分的呢。其实根据上面的ChannelHandler关系图可知，输入流(inbound)Handler与输出流(outbound)Handler实现了不同的接口。这也就意味着Netty可以跳过不是同一个类型的Handler只将数据传送给需要的Handler。</p>
+<p>&emsp; &emsp; ChannelHandler被添加到ChannelPipeline中后，就会持有一个被称作ChannelHandlerContext的对象。一般来说我们只需要获取该对象的引用即可，但是在UDP等面向非连接的数据报协议中这样做是不安全的。这个对象稍后可以用来获取Channel对象但一般来说我们只是用它来读写数据。这意味着在Netty中有两种方式传输数据：直接向Channel中写数据或者直接写到ChannelHandlerContext对象中。不同的是前一种会导致数据从ChannelPipeline的尾部开始处理而后一种会导致数据从下一个Handler处理。</p>
+<h3 id="近距离观察Handler-Encoders-Decoders和Domain-Logic"><a href="#近距离观察Handler-Encoders-Decoders和Domain-Logic" class="headerlink" title="近距离观察Handler(Encoders,Decoders和Domain Logic)"></a>近距离观察Handler(Encoders,Decoders和Domain Logic)</h3><p>&emsp; &emsp; 我们前面介绍过，Netty中有各种各样的Handler，不同的Handler功能取决于他们继承自哪一个接口(ChannelInboundHandler或ChannelOutboundHandler)。其实Netty提供了一系列的Adapter类来使事情变得简单，因为在pipline中，每一个Handler都要将事件推送给下一个Handler。而Adapter类则自动完成了这种操作，这样我们就可以只关心我们的业务逻辑。除了Adapter类，Netty还提供了编码(encode)/解码(decode)信息的功能。</p>
+<blockquote>
+<h4 id="适配类-Adapter-classes"><a href="#适配类-Adapter-classes" class="headerlink" title="适配类(Adapter classes)"></a>适配类(Adapter classes)</h4><p>Adapter类可以使我们更容易的编写代码。当我们需要些自己的ChannelHandler时建议继承Adapter类或者ecoder/decode类(其实也继承了Adapter类)。Netty提供了下列Adapter类</p>
+<ul>
+<li>ChannelHandlerAdapter</li>
+<li>ChannelInboundHandlerAdapter</li>
+<li>ChannelOutboundHandlerAdapter</li>
+<li>ChannelDuplexHandlerAdapter</li>
+</ul>
+</blockquote>
+<p>&emsp; &emsp; 我们着重观察一下encoder/decode以及SimpleChannelInboundHandler&lt; T >(ChannelInboundHandlerAdapter类)</p>
+<h4 id="Encoders，decoders"><a href="#Encoders，decoders" class="headerlink" title="Encoders，decoders"></a>Encoders，decoders</h4><p>&emsp; &emsp; 当我们运用Netty接受或者传输数据时，我们需要将数据从一种类型转换为另一种类型。当我们接受一条消息时，我们需要将其从字节类型(bytes)转换为一个Java对象(decode)，当我们发送一条消息时我们需要将其从Java对象转换为字节类型(encode)。这种转换在网络传输中非常常见(bute-message,message-byte)，因为在网络中只能传输字节类型。</p>
+<p>&emsp; &emsp; 在Netty中中多种encode/decode的基类，我们可以根据实际应用场景来决定使用哪个基类。一般来说，encode/decode的基类都有相似的名字，例如”MessageToByteEncoder”或者”ByteToMessageDecoder”。</p>
+<p>&emsp; &emsp; 严格来说，其他的Handler也可以实现encoder和decoder的功能，但我们之前说过我们根据需要来选择不同的适配器类。实际上所有的decoder都实现或者继承了ChannelInboundHandlerAdapter或者ChannelInboundHandler。复写了“channelRead”方法，这个方法会读取流入(inbound)Channel的数据然后执行解码(decode)操作将解码过的信息传递给ChannelPipeline中的下一个ChannelInboundHandler。</p>
+<p>&emsp; &emsp; 类似于流入信息，流出信息处理过程相似，encoder会将消息对象转化为字节流并传递给下一个ChannelOutboundHandler。</p>
+<h4 id="业务逻辑"><a href="#业务逻辑" class="headerlink" title="业务逻辑"></a>业务逻辑</h4><p>&emsp; &emsp; 一般来说，我们最常用的handler主要用来处理解码(decode)过的信息，并加入我们的业务逻辑。创建这样的Handler，我们只需要简单地继承SimpleChannelInboundHandler&lt; T >，其中T表示我们的Handler可以处理的类型。在这个Handler中，我们可以根据自己需求复写不同的方法，所有方法参数都包含ChannelHandlerContext参数。</p>
+<p>&emsp; &emsp; 在所有的基类方法中，最需要注意的是”channelRead0(ChannelHandlerContext,T)”方法，这个方法无论在哪里调用，T都是传递的信息，我们的应用可以对其随意处理。但需要注意的是即使我们用多线程来处理IO事件，我们也千万不能阻塞IO线程，因为这样有可能会影响程序性能。</p>
+<blockquote>
+<h4 id="阻塞操作"><a href="#阻塞操作" class="headerlink" title="阻塞操作"></a>阻塞操作</h4><p>&emsp; &emsp; 之前我们说过在Netty中千万不要阻塞IO，这也就意味着在我们的ChannelHandler中不能进行进行阻塞操作。幸运的是Netty提供了一个解决方案。在我们向ChannelPipeline中增加ChannelHandler时我们可以指定一个EventExecutorGroup，这个EventExecutorGroup会获得一个EventExecutor来执行该ChannelHandler的所有方法。不同的是EventExecutor会用一个不同的线程执行ChannelHandler的方法并在执行完毕后释放其绑定的EventLoop。</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/netty/" rel="tag"># netty</a>
+          
+            <a href="/tags/读书笔记/" rel="tag"># 读书笔记</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/13/Netty-In-Action-二/" rel="next" title="Netty In Action(二)">
+                <i class="fa fa-chevron-left"></i> Netty In Action(二)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/head.png"
+               alt="蓝星" />
+          <p class="site-author-name" itemprop="name">蓝星</p>
+           
+              <p class="site-description motion-element" itemprop="description">Welcome to my home!</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/lanxing" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Netty速成"><span class="nav-number">2.</span> <span class="nav-text">Netty速成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Channels-Events-and-Input-Output-IO"><span class="nav-number">3.</span> <span class="nav-text">Channels, Events and Input/Output (IO)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#EventLoop与Thread的关系"><span class="nav-number">3.1.</span> <span class="nav-text">EventLoop与Thread的关系</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bootstrapping-What-and-Why"><span class="nav-number">4.</span> <span class="nav-text">Bootstrapping: What and Why</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#EventLoopGroup和EventLoop"><span class="nav-number">4.1.</span> <span class="nav-text">EventLoopGroup和EventLoop</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Channel-Handlers-and-Data-Flow"><span class="nav-number">5.</span> <span class="nav-text">Channel Handlers and Data Flow</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#将ChannelPipeline和handler组合在一起"><span class="nav-number">5.1.</span> <span class="nav-text">将ChannelPipeline和handler组合在一起</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#近距离观察Handler-Encoders-Decoders和Domain-Logic"><span class="nav-number">6.</span> <span class="nav-text">近距离观察Handler(Encoders,Decoders和Domain Logic)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#适配类-Adapter-classes"><span class="nav-number">6.1.</span> <span class="nav-text">适配类(Adapter classes)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Encoders，decoders"><span class="nav-number">6.2.</span> <span class="nav-text">Encoders，decoders</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#业务逻辑"><span class="nav-number">6.3.</span> <span class="nav-text">业务逻辑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#阻塞操作"><span class="nav-number">6.4.</span> <span class="nav-text">阻塞操作</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">蓝星</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Gemini
+  </a>
+</div>
+
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2141613"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("VAJcdXNHnyLYgpT1G28i0Cp8-gzGzoHsz", "NVR7XnRF7tjrjxFvf3wmi2WF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
