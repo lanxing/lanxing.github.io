@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="netty,读书笔记," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="引言&amp;emsp; &amp;emsp; 当我们需要传输数据时，我们经常使用到Buffer。Java NIO实现了自己的Buffer类，但是功能相当有限并且效率低下。而JDK的ByteBuffer又相当笨重复杂。所以Netty实现了自己的ByteBuf来在pipeline中传输数据。 Buffer API&amp;emsp; &amp;emsp; Netty的buffer API包含两个接口：  ByteBuf ByteB">
+<meta name="keywords" content="netty,读书笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty In Action(五-Buffers)">
+<meta property="og:url" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/index.html">
+<meta property="og:site_name" content="蓝星的博客">
+<meta property="og:description" content="引言&amp;emsp; &amp;emsp; 当我们需要传输数据时，我们经常使用到Buffer。Java NIO实现了自己的Buffer类，但是功能相当有限并且效率低下。而JDK的ByteBuffer又相当笨重复杂。所以Netty实现了自己的ByteBuf来在pipeline中传输数据。 Buffer API&amp;emsp; &amp;emsp; Netty的buffer API包含两个接口：  ByteBuf ByteB">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img1.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img2.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img3.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img4.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img5.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img6.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img7.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img7.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img8.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img9.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img10.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img11.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img12.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img13.png">
+<meta property="og:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img14.png">
+<meta property="og:updated_time" content="2017-10-17T07:11:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Netty In Action(五-Buffers)">
+<meta name="twitter:description" content="引言&amp;emsp; &amp;emsp; 当我们需要传输数据时，我们经常使用到Buffer。Java NIO实现了自己的Buffer类，但是功能相当有限并且效率低下。而JDK的ByteBuffer又相当笨重复杂。所以Netty实现了自己的ByteBuf来在pipeline中传输数据。 Buffer API&amp;emsp; &amp;emsp; Netty的buffer API包含两个接口：  ByteBuf ByteB">
+<meta name="twitter:image" content="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/img1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/"/>
+
+
+
+
+
+  <title>Netty In Action(五-Buffers) | 蓝星的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">蓝星的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">蓝星</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="蓝星">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/head.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝星的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Netty In Action(五-Buffers)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-28T17:54:35+08:00">
+                2017-09-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/09/28/Netty-In-Action-五/" class="leancloud_visitors" data-flag-title="Netty In Action(五-Buffers)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>&emsp; &emsp; 当我们需要传输数据时，我们经常使用到Buffer。Java NIO实现了自己的Buffer类，但是功能相当有限并且效率低下。而JDK的ByteBuffer又相当笨重复杂。所以Netty实现了自己的ByteBuf来在pipeline中传输数据。</p>
+<h3 id="Buffer-API"><a href="#Buffer-API" class="headerlink" title="Buffer API"></a>Buffer API</h3><p>&emsp; &emsp; Netty的buffer API包含两个接口：</p>
+<ul>
+<li>ByteBuf</li>
+<li>ByteBufHolder</li>
+</ul>
+<p>&emsp; &emsp; Netty通过引用计数(reference-counting)的方式来标记什么时候需要释放一个buf及其包含的资源。Netty的Buffer有以下几个优势：</p>
+<ul>
+<li>如果有必要，可以自定义buffer类型</li>
+<li>通过内置类型标识零拷贝</li>
+<li>不需要调用flip()即可实现读写模式切换</li>
+<li>读写index分离</li>
+<li>提供链式方法</li>
+<li>引用计数</li>
+<li>提供池(Pooling)服务</li>
+</ul>
+<h3 id="ByteBuf-字节数据容器"><a href="#ByteBuf-字节数据容器" class="headerlink" title="ByteBuf-字节数据容器"></a>ByteBuf-字节数据容器</h3><p>&emsp; &emsp; ByteBuf主要用于字节缓存。ByteByf包含两个索引：读索引和写索引。这样我们可以通过调整读索引的位置来多次读取数据。</p>
+<h4 id="工作方式"><a href="#工作方式" class="headerlink" title="工作方式"></a>工作方式</h4><p>&emsp; &emsp; 当我们向ByteBuf写数据时，写索引会增长写数据的字节数量。当我们读数据时，读索引也会增长。当读索引与写索引在同一个位置时说明数据已被读完。ByteBuf变为不可读状态，如果继续读就会抛出IndexOutOfBoundsException异常。</p>
+<p>&emsp; &emsp; 当调用以“read”或“write”开头的方法时会增加读索引和写索引的位置。而调用“set”和“get”方法时则不会移动索引，但是会给出操作相对索引的位置。</p>
+<p>&emsp; &emsp; ByteBuf存储字节数有最大值，当超过这个值时会抛出异常，目前这个最大值时Integer.MAX_VALUE。</p>
+<p>​                <img src="/2017/09/28/Netty-In-Action-五/img1.png" alt="初始化readIndex和writeIndex置为0" title="初始化readIndex和writeIndex置为0"></p>
+<h4 id="ByteBuf不同类型"><a href="#ByteBuf不同类型" class="headerlink" title="ByteBuf不同类型"></a>ByteBuf不同类型</h4><p>Netty提供三种不同类型的ByteBuf，我们可以根据需要选择不同的类型</p>
+<ol>
+<li><p>堆内存Buffer(HEAP BUFFERS)</p>
+<p>&emsp; &emsp; 堆缓存是使用最广泛的，它将数据缓存在JVM的堆内存空间。Netty通过一个隐式数组来保存数据。如果我们没用池缓存(pool)技术，那么这种类型在分配和销毁内存时是非常快的.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">ByteBuf heapBuf = ...;                  </div><div class="line">       <span class="keyword">if</span> (heapBuf.hasArray()) &#123;               <span class="comment">//1</span></div><div class="line">           <span class="keyword">byte</span>[] array = heapBuf.array();		<span class="comment">//2</span></div><div class="line">           <span class="keyword">int</span> offset = heapBuf.arrayOffset() + heapBuf.position();    <span class="comment">//3</span></div><div class="line">           <span class="keyword">int</span> length = heapBuf.readableBytes();       <span class="comment">//4</span></div><div class="line">           YourImpl.method(array, offset, length);     <span class="comment">//5</span></div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+<p>//1 检测ByteBuf是否由数组支持(是否是HEAP BUFFER)</p>
+<p>//2 获取数组引用</p>
+<p>//3 计算数组第一个字节的偏移量</p>
+<p>//4 计算可读的字节数</p>
+<p>//5 自己业务逻辑实现</p>
+<p>&emsp; &emsp; 通过非堆(noneheap)ByteBuf获取数组会抛UnsupportedOperationException异常，所以在使用数组时最好通过hasArray方法先进行检测。</p>
+</li>
+<li><p>直接内存Buffer(DIRECT BUFFERS)</p>
+<p>&emsp; &emsp; 直接内存意味着Buffer处于堆外内存。当我们需要通过网络传输数据时直接内存会很方便。实际上，当我们没有使用直接内存时，在通过socket传输数据时JVM会拷贝一份Buffer中的数据，而直接内存则免去了这个步骤。但是直接内存的缺点是分配和销毁太过昂贵，这也是Netty使用Pool的原因。直接内存的另一个缺点是我们不能通过一个Array直接访问，当我们需要访问数据时需要获取数据的一份拷贝。</p>
+<p>下面代码示例了如何访问直接内存：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">ByteBuf directBuf = ...;</div><div class="line">        <span class="keyword">if</span> (!directBuf.hasArray()) &#123;                                             <span class="comment">//1</span></div><div class="line">            <span class="keyword">int</span> length = directBuf.readableBytes();                              <span class="comment">//2</span></div><div class="line">            <span class="keyword">byte</span>[] array = <span class="keyword">new</span> <span class="keyword">byte</span>[length];                                     <span class="comment">//3</span></div><div class="line">            directBuf.getBytes(array);                                           <span class="comment">//4</span></div><div class="line">            YourImpl.method(array, <span class="number">0</span>, array.length);                             <span class="comment">//5</span></div></pre></td></tr></table></figure>
+<p>// 1判断byffer是否由数组支持(否表示直接内存)</p>
+<p>//2 获取可读数据长度len</p>
+<p>//3 分配一个容量为len的数组</p>
+<p>//4 将数据督导数组中</p>
+<p>//5 处理数据</p>
+</li>
+<li><p>复合Buffer(COMPOSITE BUFFER)</p>
+<p>&emsp; &emsp; 复合缓冲区可以构造多个ByteBuf实例，并且提供一份组合视图。Netty提供了ByteBuf的子类CompositeByteBuf来处理复合缓冲区，CompositeByteBuf只是一个视图。CompositeByteBuf.hasArray永远返回false，因为她有可能包含堆缓存也可能包含直接内存缓存。</p>
+<p>&emsp; &emsp; 例如一条信息可能由两部分组成：header和body，在一个应用中body可能相同而header不同，因此我们可以复用body而只改变header即可。</p>
+<p>​                <img src="/2017/09/28/Netty-In-Action-五/img2.png" alt="CompositeByteBuf" title="CompositeByteBuf"></p>
+<p>&emsp; &emsp; 而使用JDK的ByteBuffer很难这样实现，除非我们再构建一个数组来存储header和body，如下代码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Use an array to composite them</span></div><div class="line">      ByteBuffer[] message = <span class="keyword">new</span> ByteBuffer[] &#123; header, body &#125;;</div><div class="line">      <span class="comment">// Use copy to merge both</span></div><div class="line">      ByteBuffer message2 = ByteBuffer.allocate(</div><div class="line">              header.remaining()+ body.remaining();</div><div class="line">      message2.put(header);</div><div class="line">      message2.put(body);</div><div class="line">      message2.flip();</div></pre></td></tr></table></figure>
+<p>下列代码是通过CompositeByteBuf的改进版本</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">CompositeByteBuf compBuf = ...;</div><div class="line">        ByteBuf heapBuf = ...;</div><div class="line">        ByteBuf directBuf = ...;</div><div class="line">        compBuf.addComponent(heapBuf, directBuf);                                <span class="comment">//1</span></div><div class="line">        .....</div><div class="line">        compBuf.removeComponent(<span class="number">0</span>);                                              <span class="comment">//2</span></div><div class="line">        <span class="keyword">for</span> (ByteBuf buf: compBuf) &#123;                                             <span class="comment">//3</span></div><div class="line">            System.out.println(buf.toString());</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
+<p>//1 将heapBuf和directBuf添加到复合缓冲Buffer中</p>
+<p>//2 移除第一个ButeBuf(heapBuf)</p>
+<p>//3 循环处理复合缓冲Buffer中的ByteBuf</p>
+</li>
+</ol>
+<h3 id="ByteBuf字节级别的操作"><a href="#ByteBuf字节级别的操作" class="headerlink" title="ByteBuf字节级别的操作"></a>ByteBuf字节级别的操作</h3><p>&emsp; &emsp; ByteBuf提供了很多读写操作，并且比JDK的ByteBuffer更加简单易用且性能更好</p>
+<h4 id="随机访问索引"><a href="#随机访问索引" class="headerlink" title="随机访问索引"></a>随机访问索引</h4><p>&emsp; &emsp; ByteBuf使用以0起始的索引，这意味着ByteBuf的第一个字节索引是0最后一个字节索引是capacity-1。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">ByteBuf buffer = ...;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; buffer.capacity(); i ++) &#123;</div><div class="line">        <span class="keyword">byte</span> b = buffer.getByte(i);</div><div class="line">        System.out.println((<span class="keyword">char</span>) b);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>&emsp; &emsp; 需要注意的是根据index访问数据并不会增加读索引和写索引的值。如果有需要可以通过readIndex(index)和write(index)来增加其索引值。</p>
+<h4 id="顺序访问索引"><a href="#顺序访问索引" class="headerlink" title="顺序访问索引"></a>顺序访问索引</h4><p>&emsp; &emsp; ByteBuf通过readIndex来提供顺序读数据，通过writeIndex提供顺序写数据。与jdk的ByteBuffer不同的是我们不需要调用flip()来切换读写模式。如下图所示ByteBuf通过两个指针切分成三个区域。</p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img3.png" alt="ByteBuf分割区域" title="ByteBuf分割区域"></p>
+<p>//1 已读数据(可以被回收)</p>
+<p>//2 未读数据</p>
+<p>//3 可写数据</p>
+<h4 id="可被回收的字节"><a href="#可被回收的字节" class="headerlink" title="可被回收的字节"></a>可被回收的字节</h4><p>&emsp; &emsp; 可以被回收的字节区域表示ByteBuf已经执行读操作所以可以被回收。初始化时，这段区域大小为0，当执行读操作时这个区域大小增加。需要注意的是只有执行”read”操作时才会增加该区域大小，”get”操作不会移动readerIndex。可以通过调用discardReadBytes()函数来回收该区域。</p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img4.png" alt="discardReadBytes后区域图" title="discardReadBytes后区域图"></p>
+<p>&emsp; &emsp; 当调用discardReadBytes()后，可被回收的区域大小为0，readerIndex为0。因为discardReadBytes()方法会执行内存复制操作将可读的数据复制到起始位置，所以我们最好不要频繁地调用该函数。</p>
+<h4 id="可读字节-ByteBuf中实际内容"><a href="#可读字节-ByteBuf中实际内容" class="headerlink" title="可读字节(ByteBuf中实际内容)"></a>可读字节(ByteBuf中实际内容)</h4><p>&emsp; &emsp; 任何以”read”或者”skip”开头的操作都会增长readerIndex。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Iterates the readable bytes of a buffer.</span></div><div class="line">    ByteBuf buffer = ...;</div><div class="line">    <span class="keyword">while</span> (buffer.readable()) &#123;</div><div class="line">        System.out.println(buffer.readByte());</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h4 id="可写字节"><a href="#可写字节" class="headerlink" title="可写字节"></a>可写字节</h4><p>&emsp; &emsp; 任何以write开头的操作都会增加wirerIndex的值。如果没有更多写空间，操作会抛出IndexOutOfBoundException异常。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Fills the writable bytes of a buffer with random integers.</span></div><div class="line">    ByteBuf buffer = ...;</div><div class="line">    <span class="keyword">while</span> (buffer.writableBytes() &gt;= <span class="number">4</span>) &#123;</div><div class="line">        buffer.writeInt(random.nextInt());</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
+<h4 id="清除索引"><a href="#清除索引" class="headerlink" title="清除索引"></a>清除索引</h4><p>&emsp; &emsp; 我们可以通过调用clear()函数来重置readerIndex和writerIndex。这个操作不会清除buffer内容，而是重置指针到0.</p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img5.png" alt="调用clear后区域图" title="调用clear后区域图"></p>
+<h4 id="查询操作"><a href="#查询操作" class="headerlink" title="查询操作"></a>查询操作</h4><p>&emsp; &emsp; indexOf()方法可以帮助我们定位一个值的索引位置。更加复杂的操作可以通过ByteBufProcessor实现。</p>
+<h4 id="衍生缓冲区"><a href="#衍生缓冲区" class="headerlink" title="衍生缓冲区"></a>衍生缓冲区</h4><p>&emsp; &emsp; 为了创建一个已存在buffer的视图，可以调用duplicate()，slice()，slice(int, int)，readOnly()或者order(ByteOrder)。衍生缓冲区拥有自己独立的writerIndex和ReaderIndex以及索引标志，但却共享内部存储的数据。</p>
+<p>&emsp; &emsp; 如果不想共享数据的话，可以调用copy()或者copy(int, int)函数来实现。如下示例表示ByteBuf的slice是如何工作的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Charset utf8 = Charset.forName(<span class="string">"UTF-8"</span>);</div><div class="line">      ByteBuf buf = Unpooled.copiedBuffer(<span class="string">"Netty in Action rocks!"</span>, utf8);     <span class="comment">//1</span></div><div class="line">      ByteBuf sliced = buf.slice(<span class="number">0</span>, <span class="number">14</span>);                           			 <span class="comment">//2</span></div><div class="line">      System.out.println(sliced.toString(utf8);                                <span class="comment">//3</span></div><div class="line">      buf.setByte(<span class="number">0</span>, (<span class="keyword">byte</span>) <span class="string">'J'</span>);                                        		 <span class="comment">//4</span></div><div class="line">      <span class="keyword">assert</span> buf.get(<span class="number">0</span>) == sliced.get(<span class="number">0</span>);                                      <span class="comment">//5</span></div></pre></td></tr></table></figure>
+<p>//1 创建一个ByteBuf</p>
+<p>//2 通过slice创建一个索引从0到14的ByteBuf</p>
+<p>//3 输出结果为”Netty in Action”</p>
+<p>//4 更新索引为0的字节</p>
+<p>//5 返回true，因为两个ByteBuf共享同一套数据</p>
+<p>下列代码创建了ByteBuf的一份拷贝数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Charset utf8 = Charset.forName(&quot;UTF-8&quot;);</div><div class="line">        ByteBuf buf = Unpooled.copiedBuffer(&quot;Netty in Action rocks!&quot;, utf8);     //1</div><div class="line">        ByteBuf copy = buf.copy(0, 14);                                          //2</div><div class="line">        System.out.println(copy.toString(utf8);                                  //3</div><div class="line">        buf.setByte(0, (byte) &apos;J&apos;);                                              //4</div><div class="line">        assert buf.get(0) != copy.get(0);                                        //5</div></pre></td></tr></table></figure>
+<p>//1 创建一个ByteBuf</p>
+<p>//2 copy索引从0到14的数据</p>
+<p>//3 输出”Netty in Action”</p>
+<p>//4 更新Index=0的字节值</p>
+<p>//5 不会失败，因为两个ByteBuf不共用底层是数据</p>
+<h4 id="读写操作"><a href="#读写操作" class="headerlink" title="读写操作"></a>读写操作</h4><p>ByteBuf有两种读写操作</p>
+<ul>
+<li><p>get/set开头的操作需要传入一个给定的index</p>
+</li>
+<li><p>Read/write操作不但读取当前索引的数据，还会增加readerIndex和WriterIndex</p>
+<p>​                <img src="/2017/09/28/Netty-In-Action-五/img6.png" alt="get操作" title="get操作"></p>
+<p>​                <img src="/2017/09/28/Netty-In-Action-五/img7.png" alt="set操作" title="set操作"></p>
+<p>set操作没有无符号操作</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Charset utf8 = Charset.forName(<span class="string">"UTF-8"</span>);</div><div class="line">      ByteBuf buf = Unpooled.copiedBuffer(<span class="string">"Netty in Action rocks!"</span>, utf8);     <span class="comment">//1</span></div><div class="line">      System.out.println((<span class="keyword">char</span>) buf.getByte(<span class="number">0</span>));                               <span class="comment">//2</span></div><div class="line"><span class="comment">// 3 </span></div><div class="line">      <span class="keyword">int</span> readerIndex = buf.readerIndex();</div><div class="line">      <span class="keyword">int</span> writerIndex = buf.writerIndex();</div><div class="line">      buf.setByte(<span class="number">0</span>, (<span class="keyword">byte</span>) <span class="string">'B'</span>);                                              <span class="comment">//4</span></div><div class="line">      System.out.println((<span class="keyword">char</span>) buf.getByte(<span class="number">0</span>));                               <span class="comment">//5</span></div><div class="line"><span class="comment">//6 </span></div><div class="line">      <span class="keyword">assert</span> readerIndex = buf.readerIndex();</div><div class="line">      <span class="keyword">assert</span> writerIndex = buf.writerIndex();</div></pre></td></tr></table></figure>
+<p>//1 创建ByteBuf</p>
+<p>//2 输出首个字节”N”</p>
+<p>//3 储存readerIndex和writerIndex</p>
+<p>//4 更新index=0的字节为“B”</p>
+<p>//5 应该输出更新后的”B”</p>
+<p>//6 true，因为get和set操作并不会修改索引</p>
+<p>下面看下read和write操作</p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img7.png" alt="read操作" title="read操作"></p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img8.png" alt="write操作" title="write操作"></p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img9.png" alt="write操作" title="write操作"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Charset utf8 = Charset.forName(<span class="string">"UTF-8"</span>);</div><div class="line">      ByteBuf buf = Unpooled.copiedBuffer(<span class="string">"Netty in Action rocks!"</span>, utf8);     <span class="comment">//1</span></div><div class="line">      System.out.println((<span class="keyword">char</span>) buf.readByte());                               <span class="comment">//2</span></div><div class="line">      <span class="comment">//</span></div><div class="line">      <span class="keyword">int</span> readerIndex = buf.readerIndex();                                     <span class="comment">//3</span></div><div class="line">      <span class="keyword">int</span> writerIndex = buf.writerIndex();                                     </div><div class="line">      buf.writeByte( (<span class="keyword">byte</span>) <span class="string">'?'</span>);                                              <span class="comment">//4</span></div><div class="line">      <span class="keyword">assert</span> readerIndex = buf.readerIndex();                                  <span class="comment">//5</span></div><div class="line">      <span class="keyword">assert</span> writerIndex != buf.writerIndex();</div></pre></td></tr></table></figure>
+<p>//1 创建ByteBuf</p>
+<p>//2 打印第一个字节”N”</p>
+<p>//3 存储目前的readerIndex和writeIndex</p>
+<p>//4 写一个字节</p>
+<p>//5 readerIndex不变，而writerIndex增加</p>
+<h4 id="其他有用的操作"><a href="#其他有用的操作" class="headerlink" title="其他有用的操作"></a>其他有用的操作</h4><p>​                        <img src="/2017/09/28/Netty-In-Action-五/img10.png" alt="其他操作" title="其他操作"></p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img11.png" alt="其他操作" title="其他操作"></p>
+<h3 id="ByteBufHolder"><a href="#ByteBufHolder" class="headerlink" title="ByteBufHolder"></a>ByteBufHolder</h3><p>&emsp; &emsp; 一般来说，我们在实际应用中除了存储字节数据外，还需要存储一些其他属性。例如Http返回值中，除了返回的数据还有状态，cookie等信息。这种情况，Netty提供了一个抽象接口ByteBufHolder。ByteBufHolder还支持Netty的高级功能，例如其存储的数据可以直接从缓存池中获取，如果需要还可以自动释放。ByteBufHolder仅提供了几个方法：</p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img12.png" alt="ByteBufHolder提供的方法" title="ByteBufHolder提供的方法"></p>
+<h4 id="ByteBufAllocator"><a href="#ByteBufAllocator" class="headerlink" title="ByteBufAllocator"></a>ByteBufAllocator</h4><p>&emsp; &emsp; 之前提过，Netty支持池类缓存ByteBuf。ByteBufAllocator正是为实现池类缓存而设计的，当然用户可以自由选择是否使用池缓存</p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img13.png" alt="ByteBufAllocator提供的方法" title="ByteBufAllocator提供的方法"></p>
+<p>&emsp; &emsp; ByteBufAllocator允许传入标识ByteBuf初始和最大容量的参数。并且ByteBuf是可以自动扩容的，直到扩容到允许的最大值。</p>
+<p>&emsp; &emsp; 获取ByteBufAllocator的引用很简单，我们可以通过channel(一般来说，channel还可以保存另一个ByteBufAllocator)或者绑定到ChannelHandler的ChannelHandlerContext获取。如下代码所示为如何获取ByteBufAllocator引用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Channel channel = ...;</div><div class="line">        ByteBufAllocator allocator = channel.alloc();                            <span class="comment">//1</span></div><div class="line">   ....</div><div class="line">        ChannelHandlerContext ctx = ...;</div><div class="line">        ByteBufAllocator allocator2 = ctx.alloc();                               <span class="comment">//2</span></div><div class="line">   ...</div></pre></td></tr></table></figure>
+<p>//1 从channel获取ByteBufAllocator</p>
+<p>//2 从ChannelHandlerContext中获取ByteBufAllocator</p>
+<p>&emsp; &emsp; Netty有两种不同的ByteBufAllocator实现方式，一种通过池子缓存ByteBuf的实例来减少分配和销毁ByteBuf实例的开销，同时尽量减少内存碎片的产生。另外一种不缓存ByteBuf，每次都返回一个新的ByteBuf实例。Netty默认使用PooledByteBufAllocator(带有池缓存)，当然可以通过修改ChannelConfig配置或者在启动服务器时指定另一种ByteBufAllocator来使用不使用池缓存的模式。</p>
+<h4 id="Unpooled"><a href="#Unpooled" class="headerlink" title="Unpooled"></a>Unpooled</h4><p>&emsp; &emsp; 有时候我们无法获取ByteBufAllocator的实例来声明ByteBuf，对于这种情况，Netty提供了一个工具类Unpooled，该类包含一些静态方法来创建无池缓存的ByteBuf。</p>
+<p>​                        <img src="/2017/09/28/Netty-In-Action-五/img14.png" alt="Unpooled提供的方法" title="Unpooled提供的方法"></p>
+<p>当然Unpooled也可以在不使用Netty时用来获取ByteBuf</p>
+<h4 id="ByteBufUtil"><a href="#ByteBufUtil" class="headerlink" title="ByteBufUtil"></a>ByteBufUtil</h4><p>&emsp; &emsp; ByteBufUtil同样也提供了一些静态方法，尤其在操作ByteBuf时相当有用。其中最有用的应当是hexdump()方法，其主要用于将ByteBuf的内容以十六进制数据输出。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/netty/" rel="tag"># netty</a>
+          
+            <a href="/tags/读书笔记/" rel="tag"># 读书笔记</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/21/Netty-In-Action-四/" rel="next" title="Netty In Action(四)">
+                <i class="fa fa-chevron-left"></i> Netty In Action(四)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/head.png"
+               alt="蓝星" />
+          <p class="site-author-name" itemprop="name">蓝星</p>
+           
+              <p class="site-description motion-element" itemprop="description">Welcome to my home!</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/lanxing" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Buffer-API"><span class="nav-number">2.</span> <span class="nav-text">Buffer API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ByteBuf-字节数据容器"><span class="nav-number">3.</span> <span class="nav-text">ByteBuf-字节数据容器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#工作方式"><span class="nav-number">3.1.</span> <span class="nav-text">工作方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ByteBuf不同类型"><span class="nav-number">3.2.</span> <span class="nav-text">ByteBuf不同类型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ByteBuf字节级别的操作"><span class="nav-number">4.</span> <span class="nav-text">ByteBuf字节级别的操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#随机访问索引"><span class="nav-number">4.1.</span> <span class="nav-text">随机访问索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#顺序访问索引"><span class="nav-number">4.2.</span> <span class="nav-text">顺序访问索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可被回收的字节"><span class="nav-number">4.3.</span> <span class="nav-text">可被回收的字节</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可读字节-ByteBuf中实际内容"><span class="nav-number">4.4.</span> <span class="nav-text">可读字节(ByteBuf中实际内容)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可写字节"><span class="nav-number">4.5.</span> <span class="nav-text">可写字节</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#清除索引"><span class="nav-number">4.6.</span> <span class="nav-text">清除索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查询操作"><span class="nav-number">4.7.</span> <span class="nav-text">查询操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#衍生缓冲区"><span class="nav-number">4.8.</span> <span class="nav-text">衍生缓冲区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#读写操作"><span class="nav-number">4.9.</span> <span class="nav-text">读写操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他有用的操作"><span class="nav-number">4.10.</span> <span class="nav-text">其他有用的操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ByteBufHolder"><span class="nav-number">5.</span> <span class="nav-text">ByteBufHolder</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ByteBufAllocator"><span class="nav-number">5.1.</span> <span class="nav-text">ByteBufAllocator</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Unpooled"><span class="nav-number">5.2.</span> <span class="nav-text">Unpooled</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ByteBufUtil"><span class="nav-number">5.3.</span> <span class="nav-text">ByteBufUtil</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">蓝星</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Gemini
+  </a>
+</div>
+
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2141613"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("VAJcdXNHnyLYgpT1G28i0Cp8-gzGzoHsz", "NVR7XnRF7tjrjxFvf3wmi2WF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
