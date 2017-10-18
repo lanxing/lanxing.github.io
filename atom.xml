@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://lanxinglan.cn/"/>
-  <updated>2017-10-17T07:11:40.000Z</updated>
+  <updated>2017-10-18T03:07:32.000Z</updated>
   <id>http://lanxinglan.cn/</id>
   
   <author>
@@ -16,11 +16,86 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>在Docker环境下部署Kafka</title>
+    <link href="http://lanxinglan.cn/2017/10/18/%E5%9C%A8Docker%E7%8E%AF%E5%A2%83%E4%B8%8B%E9%83%A8%E7%BD%B2Kafka/"/>
+    <id>http://lanxinglan.cn/2017/10/18/在Docker环境下部署Kafka/</id>
+    <published>2017-10-18T02:09:51.000Z</published>
+    <updated>2017-10-18T03:07:32.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="1-下载kafka和zookeeper镜像"><a href="#1-下载kafka和zookeeper镜像" class="headerlink" title="1.下载kafka和zookeeper镜像"></a>1.下载kafka和zookeeper镜像</h3><ol>
+<li><p>直接下载最新的zookeeper镜像，由于我已经下载过了，这里只做了更新</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker pull zookeeper</div></pre></td></tr></table></figure>
+<p>​                        <img src="/2017/10/18/在Docker环境下部署Kafka/img1.png" alt="zookeeper镜像下载" title="zookeeper镜像下载"></p>
+</li>
+<li><p>下载kafka镜像，这里使用wurstmeister/kafka的最新镜像</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker pull wurstmeister/kafka</div></pre></td></tr></table></figure>
+<p>​                        <img src="/2017/10/18/在Docker环境下部署Kafka/img2.png" alt="kafka镜像下载" title="kafka镜像下载"></p>
+</li>
+</ol>
+<p>下载完成后，运行docker images查看下载的镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker images</div></pre></td></tr></table></figure>
+<p>​                            <img src="/2017/10/18/在Docker环境下部署Kafka/img3.png" alt="docker镜像" title="docker镜像"></p>
+<h3 id="2-启动容器"><a href="#2-启动容器" class="headerlink" title="2.启动容器"></a>2.启动容器</h3><p>&emsp; &emsp; 由于要涉及到zookeeper和kafka之间的通信，所以我们运用docker内部容器通信机制先新建一个网络。</p>
+<ol>
+<li><p>新建网络</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker network create app</div></pre></td></tr></table></figure>
+<p>​                        <img src="/2017/10/18/在Docker环境下部署Kafka/img4.png" alt="新建docker网络" title="新建docker网络"></p>
+<p>运行 docker network ls查看新建的网络</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker network ls</div></pre></td></tr></table></figure>
+<p>​                        <img src="/2017/10/18/在Docker环境下部署Kafka/img5.png" alt="查看新建网络" title="查看新建网络"></p>
+<p>运行docker network inspect app查看网络详细信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker network inspect app</div></pre></td></tr></table></figure>
+<p>​                        <img src="/2017/10/18/在Docker环境下部署Kafka/img6.png" alt="网络详细信息" title="网络详细信息"></p>
+<p>从详细信息中可以看到其连接的containers为空，说明还没有容器连接进来</p>
+</li>
+<li><p>新建zookeeper和kafka容器</p>
+<p>创建zookeeper容器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run --net=app --name zookeeper -p 2181 -t zookeeper</div></pre></td></tr></table></figure>
+<p>创建kafka容器，注意由于使用的是docker创建的网络，所以KAFKA_ADVERTISED_HOST_NAME参数需要设置为0.0.0.0</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">docker run --net=app --name kafka -p 9092 \</div><div class="line">--link zookeeper \</div><div class="line">--env KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \</div><div class="line">--env KAFKA_ADVERTISED_HOST_NAME=0.0.0.0 \</div><div class="line">--env KAFKA_ADVERTISED_PORT=9092 \</div><div class="line">wurstmeister/kafka:latest</div></pre></td></tr></table></figure>
+<p>运行docker ps查看正在运行的容器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker ps</div></pre></td></tr></table></figure>
+<p>​                <img src="/2017/10/18/在Docker环境下部署Kafka/img7.png" alt="docker启动的容器" title="docker启动的容器"></p>
+</li>
+</ol>
+<h3 id="3-测试发送消息和接受消息"><a href="#3-测试发送消息和接受消息" class="headerlink" title="3.测试发送消息和接受消息"></a>3.测试发送消息和接受消息</h3><p>在命令行下运行 docker exec -it kafka /bin/bash命令，进入kafka容器内部</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker exec -it kafka /bin/bash</div></pre></td></tr></table></figure>
+<p>​                    <img src="/2017/10/18/在Docker环境下部署Kafka/img8.png" alt="kafka容器内部命令行" title="kafka容器内部命令行"></p>
+<p>kafka文件存放在/opt/kafka_2.12-0.11.0.1/目录下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cd /opt/kafka_2.12-0.11.0.1/</div></pre></td></tr></table></figure>
+<p>调用kafka-topics.sh创建一个mykafka的topic</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic mykafka</div></pre></td></tr></table></figure>
+<p>调用kafka-console-producer.sh运行一个生产者</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-console-producer.sh --broker-list localhost:9092 --topic mykafka</div></pre></td></tr></table></figure>
+<p>​                    <img src="/2017/10/18/在Docker环境下部署Kafka/img9.png" alt="启动生产者" title="启动生产者"></p>
+<p>启动另一个窗口，按照上边的步骤启动kafka容器的命令行，执行如下消费者命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-console-consumer.sh --zookeeper zookeeper:2181 --topic mykafka --from-beginning</div></pre></td></tr></table></figure>
+<p>在生产者窗口发送一条命令，查看消费者端口是否接到命令</p>
+<p>​                    <img src="/2017/10/18/在Docker环境下部署Kafka/img10.png" alt="发送消息" title="发送消息"></p>
+<p>​                    <img src="/2017/10/18/在Docker环境下部署Kafka/img11.png" alt="接收消息" title="接收消息"></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;1-下载kafka和zookeeper镜像&quot;&gt;&lt;a href=&quot;#1-下载kafka和zookeeper镜像&quot; class=&quot;headerlink&quot; title=&quot;1.下载kafka和zookeeper镜像&quot;&gt;&lt;/a&gt;1.下载kafka和zookeeper镜像&lt;/
+    
+    </summary>
+    
+      <category term="Kafka" scheme="http://lanxinglan.cn/categories/Kafka/"/>
+    
+    
+      <category term="kafka" scheme="http://lanxinglan.cn/tags/kafka/"/>
+    
+      <category term="docker" scheme="http://lanxinglan.cn/tags/docker/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Netty In Action(五-Buffers)</title>
     <link href="http://lanxinglan.cn/2017/09/28/Netty-In-Action-%E4%BA%94/"/>
     <id>http://lanxinglan.cn/2017/09/28/Netty-In-Action-五/</id>
     <published>2017-09-28T09:54:35.000Z</published>
-    <updated>2017-10-17T07:11:40.000Z</updated>
+    <updated>2017-10-17T07:28:06.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>&emsp; &emsp; 当我们需要传输数据时，我们经常使用到Buffer。Java NIO实现了自己的Buffer类，但是功能相当有限并且效率低下。而JDK的ByteBuffer又相当笨重复杂。所以Netty实现了自己的ByteBuf来在pipeline中传输数据。</p>
 <h3 id="Buffer-API"><a href="#Buffer-API" class="headerlink" title="Buffer API"></a>Buffer API</h3><p>&emsp; &emsp; Netty的buffer API包含两个接口：</p>

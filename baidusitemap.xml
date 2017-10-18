@@ -4,8 +4,30 @@
 
     
   <url>
+    <loc>http://lanxinglan.cn/2017/10/18/%E5%9C%A8Docker%E7%8E%AF%E5%A2%83%E4%B8%8B%E9%83%A8%E7%BD%B2Kafka/</loc>
+    <lastmod>2017-10-18T03:07:32.000Z</lastmod>
+    <data>
+        <display>
+        <title>在Docker环境下部署Kafka</title>
+        <pubTime>2017-10-18T02:09:51.000Z</pubTime>
+        
+        <tag>kafka</tag>
+         
+        <tag>docker</tag>
+         
+         
+           
+             
+              <breadCrumb title="Kafka" url="http://lanxinglan.cn/categories/Kafka/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://lanxinglan.cn/2017/09/28/Netty-In-Action-%E4%BA%94/</loc>
-    <lastmod>2017-10-17T07:11:40.000Z</lastmod>
+    <lastmod>2017-10-17T07:28:06.000Z</lastmod>
     <data>
         <display>
         <title>Netty In Action(五-Buffers)</title>
