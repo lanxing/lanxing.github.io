@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://lanxinglan.cn/2017/10/26/Netty-In-Action-%E5%85%AD-ChannelHandler/</loc>
+    
+    <lastmod>2017-10-30T08:58:58.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://lanxinglan.cn/2017/10/18/%E5%9C%A8Docker%E7%8E%AF%E5%A2%83%E4%B8%8B%E9%83%A8%E7%BD%B2Kafka/</loc>
     
     <lastmod>2017-10-18T03:07:32.000Z</lastmod>

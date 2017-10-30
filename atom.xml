@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://lanxinglan.cn/"/>
-  <updated>2017-10-18T03:07:32.000Z</updated>
+  <updated>2017-10-30T08:58:58.000Z</updated>
   <id>http://lanxinglan.cn/</id>
   
   <author>
@@ -14,6 +14,155 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Netty In Action(六-ChannelHandler)</title>
+    <link href="http://lanxinglan.cn/2017/10/26/Netty-In-Action-%E5%85%AD-ChannelHandler/"/>
+    <id>http://lanxinglan.cn/2017/10/26/Netty-In-Action-六-ChannelHandler/</id>
+    <published>2017-10-26T06:46:48.000Z</published>
+    <updated>2017-10-30T08:58:58.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>  一般来说，在网络应用中接收连接发送数据还不是最重要的，最重要的应该是如何处理数据。Netty提供了ChannelHandler接口用来处理数据。同时我们可以将ChannelHandler串起来形成一个链条(filter模式)来串行处理数据，这样每一个ChannelHandler就只需要实现一部分简单的功能即可。另外我们还可以在程序运行期间对ChannelHandler进行修改。</p>
+<h3 id="ChannelPipeline"><a href="#ChannelPipeline" class="headerlink" title="ChannelPipeline"></a>ChannelPipeline</h3><p>  ChannelPipeline是Channel中处理输入和输出数据的ChannelHandler的集合。其运用过滤器模式来控制事件的执行以及多个ChannelHandler之间的连接。</p>
+<p>  每创建一个新的Channel都会附带创建一个ChannelPipeline并将其添加到Channel中。一旦完成，Channel和其对应的ChannelPipeline就紧密联系在一起，Channel无法添加一个新的CHannelPipeline或者将老的ChannelPipeline移除。</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img1.png" alt="ChannelPipeline示意图" title="ChannelPipeline示意图">
+<p>  如上图所示描述了ChannelPipeline中ChannelHandler处理数据的流程。如果一个流入数据流事件被触发，数据将会从ChannelPipeline的起始位置传输到末尾，如果是流出事件，数据将从末尾位置传输到起始位置。ChannelPipeline可以根据ChannelHandler的类型来判断是否需要当前ChannelHandler处理数据，如果不需要则跳到下一个。</p>
+<p>  ChannelPipeline可以在运行期间进行修改，所以我们可以在一个ChannelPipeline中修改另一个ChannelPipeline。如下图所示为ChannelPipeline提供的方法：</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img2.png" alt="img2.png" title="">
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img3.png" alt="ChannelPipeline提供的方法" title="ChannelPipeline提供的方法">
+<p>下面代码展示了如何修改一个CHannelPipeline</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">ChannelPipeline pipeline = ..;</div><div class="line">      FirstHandler firstHandler = <span class="keyword">new</span> FirstHandler();                       <span class="comment">//1</span></div><div class="line">      pipeline.addLast(<span class="string">"handler1"</span>, firstHandler);                           <span class="comment">//2</span></div><div class="line">      pipeline.addFirst(<span class="string">"handler2"</span>, <span class="keyword">new</span> SecondHandler());                   <span class="comment">//3</span></div><div class="line">      pipeline.addLast(<span class="string">"handler3"</span>, <span class="keyword">new</span> ThirdHandler());                     <span class="comment">//4</span></div><div class="line">      pipeline.remove(<span class="string">"handler3"</span>);                                          <span class="comment">//5</span></div><div class="line">      pipeline.remove(firstHandler);                                        <span class="comment">//6</span></div><div class="line">      pipeline.replace(<span class="string">"handler2"</span>, <span class="string">"handler4"</span>, <span class="keyword">new</span> FourthHandler()); 		  <span class="comment">//7</span></div></pre></td></tr></table></figure>
+<ol>
+<li>创建FirstHandler实例</li>
+<li>将FirstChanelHandler添加到piplene中</li>
+<li>将SecondHandler添加到Pipline中的队列首位置，其在FirstHandler之前</li>
+<li>将ThirdHandler添加到Pipline的队尾</li>
+<li>通过名称移除Handler</li>
+<li>通过实例移除Handler</li>
+<li>通过名称将SecondHandler替换成FouthHandler</li>
+</ol>
+<blockquote>
+<p>一般来说被添加到ChannelPipeline中的ChannelHandler都会处理传递给它的事件，所以任何一个ChannelHandler一定不要阻塞，否则会影响整个ChannelPipeline的性能</p>
+</blockquote>
+<p>  ChannelPipline除了提供修改ChannelHandler的接口外，还提供额外的查询ChannelPipline中是否存在该ChannelHandler的接口，如下所示：</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img4.png" alt="ChannelPipeline中Get操作" title="ChannelPipeline中Get操作">
+<p>  由于ChannelPipline继承了ChannelInboundInvoker和ChannelOutboundInvoker，因此ChannelPipline暴露了其接口。如下图所示为ChannelPipline暴露的ChannelInboundInvoker的接口。除了ChannelPipline，ChannelHandlerContext也继承了ChannelInboundInvoker同时也包含下列接口。</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img5.png" alt="img5.png" title="">
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img6.png" alt="ChannelPipeline中暴露的ChannelInboundInvoker方法" title="ChannelPipeline中暴露的ChannelInboundInvoker方法">
+<p>下图所示为ChannelPipline暴露的ChannelOutboundInvoker的方法</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img7.png" alt="ChannelPipeline中暴露的ChannelOutboundInvoker方法" title="ChannelPipeline中暴露的ChannelOutboundInvoker方法">
+<h3 id="ChannelHandlerContext"><a href="#ChannelHandlerContext" class="headerlink" title="ChannelHandlerContext"></a>ChannelHandlerContext</h3><p>  每次向ChannelPipline中新增ChannelHandler时都会为ChannelHandler新建一个ChannelHandlerContext，并且ChannelHandler通过ChannelHandlerContext与其他的ChannelHandler进行通信。</p>
+<p>  ChannelHandlerContext一旦被创建就不会再改变，因此应用可以对其进行缓存。</p>
+<p>  ChannelHandlerContext也实现了ChannelInboundInvoker和ChannelOutboundInvoker接口，因此它和ChannelPipline及Channel有许多相同的方法。不同的是在ChannelPipline或者Channel上调用方法数据会贯穿整个ChannelPipline，而在ChannelHandlerContext上调用则只会贯穿该ChannelHandler之后的ChannelHandler链路。</p>
+<h4 id="通知下一个ChannelHandler"><a href="#通知下一个ChannelHandler" class="headerlink" title="通知下一个ChannelHandler"></a>通知下一个ChannelHandler</h4><p>  通过调用ChannelInboundInvoker和ChannelOutboundInvoker的方法我们可以通知最近的Handler，事件触发的位置取决于我们的设置。</p>
+<p>如下图展示了ChannelHandlerContext和ChannelHandler以及ChannelPipline的关系</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img8.png" alt="ChannelHandlerContext、ChannelHandler与ChannelPipline关系图" title="ChannelHandlerContext、ChannelHandler与ChannelPipline关系图">
+<ol>
+<li>ChannelPipline绑定的Channel</li>
+<li>ChannelPipline绑定到Chanel并持有增加到其中的ChannelHandler实例</li>
+<li>ChannelHandler是ChannelPipline的一部分</li>
+<li>当向ChannelPipline添加ChannelHandler时创建ChannelHandlerContext</li>
+</ol>
+<p>如果我们想触发一个贯穿ChannelPipline的事件流，我们有两种不同的方法可以达成</p>
+<ul>
+<li>调用Channel的方法</li>
+<li>调用ChannelPipline的方法</li>
+</ul>
+<p>如下代码所示，分别通过Channel和ChannelPipline触发一个写操作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">ChannelHandlerContext ctx = ..;</div><div class="line">      Channel channel = ctx.channel();                                      <span class="comment">//A</span></div><div class="line">      channel.write(Unpooled.copiedBuffer(<span class="string">"Netty in Action"</span>,</div><div class="line">              CharsetUtil.UTF_8));                                          <span class="comment">//B</span></div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">ChannelHandlerContext ctx = ..;</div><div class="line">      ChannelPipeline pipeline = ctx.pipeline();                           <span class="comment">//A</span></div><div class="line">      pipeline.write(Unpooled.copiedBuffer(<span class="string">"Netty in Action"</span>,</div><div class="line">              CharsetUtil.UTF_8));                                         <span class="comment">//B</span></div></pre></td></tr></table></figure>
+<p>如下图所示为通知事件在ChannelPipline中传输过程</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img9.png" alt="通知事件在ChannelPipline中传输过程" title="通知事件在ChannelPipline中传输过程">
+<ol>
+<li>事件传输到第一个ChannelHandler</li>
+<li>通过赋值给ChannelHandlerContext，ChannelPipline将事件传输给下一个ChannelHandler</li>
+<li>同上</li>
+</ol>
+<p>  有时候我们想将事件从一个特定的位置进行触发然后传输并屏蔽该位置之前的Handler，那么我们可以通过ChannelHandlerContext来完成。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ChannelHandlerContext ctx = ..;                                          <span class="comment">//1</span></div><div class="line">      ctx.write(Unpooled.copiedBuffer(<span class="string">"Netty in Action"</span>, CharsetUtil.UTF_8));  <span class="comment">//2</span></div></pre></td></tr></table></figure>
+<ol>
+<li>获取ChannelHandlerContext引用</li>
+<li>触发写事件</li>
+</ol>
+<p>使用上述代码，事件将从ChannelHandlerContext指定的下一个ChannelHandler开始传输，如下示意图</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img10.png" alt="通知事件在ChannelPipline中传输过程" title="通知事件在ChannelPipline中传输过程">
+<ol>
+<li>通过ChannelHandlerContext将事件传输给特定的ChannelHandler</li>
+<li>事件传输</li>
+<li>Handler执行完毕后数据输出</li>
+</ol>
+<h4 id="修改ChannelPipline"><a href="#修改ChannelPipline" class="headerlink" title="修改ChannelPipline"></a>修改ChannelPipline</h4><p>  我们可以通过调用ChannelHandler的pipline()方法获取ChannelPipline引用。然后我们就可以对其中的ChannelHandler进行操作。</p>
+<blockquote>
+<p>我们可以将ChannelHandlerContext存储起来，在其他方法或者线程中来发送数据</p>
+</blockquote>
+<p>如下代码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WriteHandler</span> <span class="keyword">extends</span> <span class="title">ChannelHandlerAdapter</span> </span>&#123;</div><div class="line">         <span class="keyword">private</span> ChannelHandlerContext ctx;</div><div class="line">         <span class="meta">@Override</span></div><div class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handlerAdded</span><span class="params">(ChannelHandlerContext ctx)</span> </span>&#123;</div><div class="line">             <span class="keyword">this</span>.ctx = ctx;                                               <span class="comment">//1</span></div><div class="line">         &#125;</div><div class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">send</span><span class="params">(String msg)</span> </span>&#123;                                     <span class="comment">//2</span></div><div class="line">             ctx.write(msg);</div><div class="line">         &#125;</div><div class="line">     &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>存储ChannelHandlerContext引用，方便后边使用</li>
+<li>通过之前存储的ChannelHandlerContext发送数据</li>
+</ol>
+<p>  需要注意的是，如果ChannelHandler实例被@Sharable注解，那么它可以被添加到多个ChannelPipline中。这就意味着这个ChannelHandler拥有多个ChannelHandlerContext，也就是说单一实例的ChannelHandler可以绑定不同的ChannelHandlerContext被调用。因此，当我们想要使用@Sharable注解一个ChannelHandler时，我们必须要保证该Handler是线程安全的。</p>
+<h3 id="状态模型"><a href="#状态模型" class="headerlink" title="状态模型"></a>状态模型</h3><p>  Netty有一套简单的状态模型和ChannelInboundHandler的方法一一对应。如下图所示四中不同的状态:</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img11.png" alt="img11.png" title="">
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img12.png" alt="channel的周期状态" title="channel的周期状态">
+<p>Channel在生命周期中会处于不同的状态，如下图所示：</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img13.png" alt="状态转换模型" title="状态转换模型">
+<p>  在一些其他情况下，我们可能发现其他的状态之间的转换，这是因为用户可以手动从EventLoop中注销Channel然后再次注册该Channel。在这种情况下，我们可能会见到多个channelRegistered和channelUnregistered的状态转换，但是channelActive和channelInactive状态变换只会出现一次，因为一个channel只能存活于一个连接生命周期然后就会被回收，如果要重新连接，则需要重新创建一个Channle。</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img14.png" alt="状态转换模型" title="状态转换模型">
+<h3 id="常用ChannelHandler及其类型"><a href="#常用ChannelHandler及其类型" class="headerlink" title="常用ChannelHandler及其类型"></a>常用ChannelHandler及其类型</h3><p>  通过使用ChannelHandler，Netty支持拦截操作以及状态变更通知，这样我们能够更加方便简单地写可重复运用的业务逻辑。</p>
+<p>Netty支持两种类型的ChannelHandler，如下图所示：</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img15.png" alt="ChannelHandler类型" title="ChannelHandler类型">
+<h4 id="ChannelHandler——所有ChannelHandler的父类"><a href="#ChannelHandler——所有ChannelHandler的父类" class="headerlink" title="ChannelHandler——所有ChannelHandler的父类"></a>ChannelHandler——所有ChannelHandler的父类</h4><p>  Netty的handler类型相对来说定义明确且层次接口清晰。所有Handler的父类都是ChannelHandler。当ChannelHandler被添加或者从ChannelPipline中移除时，其提供相应的回调函数。</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img16.png" alt="ChannelHandler提供回调函数" title="ChannelHandler提供回调函数">
+<p>  Netty为ChannelHandler实现了一个适配器类ChannelHandlerAdapter，我们在使用时只需要复写我们感兴趣的方法即可，其最基本的作用是将事件传递给ChannelPipline中的下一个ChannelHandler。</p>
+<h4 id="Inbound-handlers"><a href="#Inbound-handlers" class="headerlink" title="Inbound handlers"></a>Inbound handlers</h4><p>ChannelInboundHandler提供Channel状态变化或者接受到数据时调用的方法，如下所示为其提供的方法</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img17.png" alt="img17.png" title="">
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img18.png" alt="ChannelInboundHandler提供的回调函数" title="ChannelInboundHandler提供的回调函数">
+<p>需要特殊说明的是上面所有的方法都是ChannelInboundInvoker方法的一个副本。</p>
+<p>  需要特别注意的是，ChannelInboundHandler用于接受数据，所以需要复写channelRead(…)方法，而该方法需要手动释放资源。这一点很重要，因为Netty使用池缓存ByteBuf对象，如果我们忘记释放资源就会造成资源浪费甚至资源枯竭。如下代码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Sharable</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DiscardHandler</span> <span class="keyword">extends</span> <span class="title">ChannelInboundHandlerAdapter</span> </span>&#123;    <span class="comment">//1</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">channelRead</span><span class="params">(ChannelHandlerContext ctx,</span></span></div><div class="line"><span class="function"><span class="params">                            Object msg)</span> </span>&#123;</div><div class="line">        ReferenceCountUtil.release(msg);                               <span class="comment">//2</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>继承ChannelInboundHandlerAdapter</li>
+<li>释放资源</li>
+</ol>
+<p>  忘记释放资源会造成资源枯竭，幸运的而是Netty会在忘记释放资源的地方打印Warn日志，这让我们比较容易发现在哪边释放忘记释放资源。</p>
+<p>同时Netty为我们提供了SimpleChannelInboundHandler类，该类帮助我们自动释放资源，因此我们<strong>一定不能</strong>缓存资源供后续使用，如下代码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Sharable</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SimpleDiscardHandler</span> <span class="keyword">extends</span> <span class="title">SimpleChannelInboundHandler</span>&lt;<span class="title">Object</span>&gt; </span>&#123;    <span class="comment">//1</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">channelRead</span><span class="params">(ChannelHandlerContext ctx,</span></span></div><div class="line"><span class="function"><span class="params">                            Object msg)</span> </span>&#123;</div><div class="line">        <span class="comment">// No need to do anything special                                           //2</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>继承SimpleChannelInboundHandler</li>
+<li>不需要手动释放资源</li>
+</ol>
+<p>如果我们队其他状态改变感兴趣，可以复写其他函数。</p>
+<h4 id="Outbound-handlers"><a href="#Outbound-handlers" class="headerlink" title="Outbound handlers"></a>Outbound handlers</h4><p>ChannelOutboundHandler与ChannelInboundHandler类似，如下所示为其提供的方法：</p>
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img19.png" alt="img19.png" title="">
+<img src="/2017/10/26/Netty-In-Action-六-ChannelHandler/img20.png" alt="ChannelOutboundHandler提供的回调函数" title="ChannelOutboundHandler提供的回调函数">
+<p>  类似于ChannelInboundHandler，Netty也提供了ChannelOutboundHandlerAdapter适配器类，我们可以只实现自己感兴趣的方法。如果继承ChannelOutboundHandlerAdapter，在我们使用时仍然需要手动释放资源.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Sharable</span></div><div class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DiscardOutboundHandler</span></span></div><div class="line"><span class="class">            <span class="keyword">extends</span> <span class="title">ChannelOutboundHandlerAdapter</span> </span>&#123;                     <span class="comment">//1</span></div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(ChannelHandlerContext ctx,</span></span></div><div class="line"><span class="function"><span class="params">                          Object msg, ChannelPromise promise)</span> </span>&#123;</div><div class="line">            ReferenceCountUtil.release(msg);                            <span class="comment">//2</span></div><div class="line">            promise.setSuccess();                                       <span class="comment">//3</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>继承自ChannelOutboundHandlerAdapter</li>
+<li>释放资源</li>
+<li>通知ChannelPromise</li>
+</ol>
+<p>  需要注意的是我们需要手动释放资源并且通知ChannelPromise，如果ChannelPromise没有被通知那么有可能与之对应的ChannelFutureListener不会被触发。</p>
+<blockquote>
+<p>当消息被消费并且不会再传递到下一个ChannelOutboundHandler时，我们需要手动释放资源。一旦Channel被关闭或者数据传输到真正的传输层(网络模型)，资源会被自动释放</p>
+</blockquote>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;引言&quot;&gt;&lt;a href=&quot;#引言&quot; class=&quot;headerlink&quot; title=&quot;引言&quot;&gt;&lt;/a&gt;引言&lt;/h3&gt;&lt;p&gt;  一般来说，在网络应用中接收连接发送数据还不是最重要的，最重要的应该是如何处理数据。Netty提供了ChannelHandler接口用来处
+    
+    </summary>
+    
+      <category term="读书笔记" scheme="http://lanxinglan.cn/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+    
+      <category term="netty" scheme="http://lanxinglan.cn/tags/netty/"/>
+    
+      <category term="读书笔记" scheme="http://lanxinglan.cn/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
   
   <entry>
     <title>在Docker环境下部署Kafka</title>
