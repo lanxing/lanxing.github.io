@@ -3,6 +3,84 @@
   
     
     <entry>
+      <title><![CDATA[Kafka总结]]></title>
+      <url>/2018/03/28/Kafka%E6%80%BB%E7%BB%93/</url>
+      <content type="html"><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>原博客大神地址 <a href="http://www.jasongj.com/" target="_blank" rel="external">http://www.jasongj.com/</a></p>
+<p>Kafka是由LinkedIn开发的一个分布式的消息系统，使用Scala编写，它以可水平扩展和高吞吐率而被广泛使用。目前越来越多的开源分布式处理系统如Cloudera、Apache Storm、Spark都支持与Kafka集成。</p>
+<img src="/2018/03/28/Kafka总结/img_1.png" alt="Kafka拓扑结构" title="Kafka拓扑结构">
+<p>如上图所示为Kafka拓扑结构，一个典型的Kafka集群包括Producer、Broker以及Consumer。Producer负责消息的创建与发送。Broker存储消息，一般来说Broker越多集群的吞度量越高。Consumer负责消费消息。整个集群通过ZK来进行管理，包括leader的选举以及Consumer扩容时的负载均衡。</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="topic-amp-amp-partion"><a href="#topic-amp-amp-partion" class="headerlink" title="topic &amp;&amp; partion"></a>topic &amp;&amp; partion</h3><p>topic相当于一组或者一类消息的组合，或者可以简单认为是一个queue。用户将同一个topic的消息发送到该queue，然后消费端根据订阅的topic从queue中获取消息进行消费。Kafka是将消息序列化到磁盘上的，为了提高系统的吞吐率，一般来说一个Topic会分成一个或者多个Partion，每个Partion对应一个物理文件夹，该文件夹下存储着这个Partion的所有消息以及索引文件。</p>
+<img src="/2018/03/28/Kafka总结/img2" alt="topic存储结构" title="topic存储结构">
+<p>如上图所示为两个topic的存储结构，每个topic分别对应13和19个partion</p>
+<p>因为每条消息都被append到partion中，属于顺序写磁盘，因此效率非常高。</p>
+<img src="/2018/03/28/Kafka总结/img3" alt="img3" title="">
+<p>传统的消息一般被消费后都会删除，而Kafka集群则会保留所有的消息。至于删除策略可以人为设定，目前支持两种：基于时间的删除策略以及基于单个partion大小的删除策略。</p>
+<p>这里要注意，因为Kafka读取特定消息的时间复杂度为O(1)，即与文件大小无关，所以这里删除过期文件与提高Kafka性能无关。选择怎样的删除策略只与磁盘以及具体的需求有关。另外，Kafka会为每一个Consumer Group保留一些metadata信息——当前消费的消息的position，也即offset。这个offset由Consumer控制。正常情况下Consumer会在消费完一条消息后递增该offset。当然，Consumer也可将offset设成一个较小的值，重新消费一些消息。因为offet由Consumer控制，所以Kafka broker是无状态的，它不需要标记哪些消息被哪些消费过，也不需要通过broker去保证同一个Consumer Group只有一个Consumer能消费某一条消息，因此也就不需要锁机制，这也为Kafka的高吞吐率提供了有力保障。</p>
+<h3 id="producer"><a href="#producer" class="headerlink" title="producer"></a>producer</h3><p>Producer向Broker发送消息时会根据Partion选择机制将消息发送到不同Broker的不同的Partion，所有的消息都可以均匀地发布到不同的Partion中，这样就实现了负载均衡。我们可以通过修改$KAFKA_HOME/config/server.properties中的num.partitions的值来指定新建Topic中默认Partion的数量。在发送消息时，Kafka根据Key和Partion机制来选择将消息发送到哪一个Partion中。</p>
+<h3 id="consumer"><a href="#consumer" class="headerlink" title="consumer"></a>consumer</h3><p>同一个topic的一条消息只可以被一个Consumer Group中的一个Consumer消费，但可以被多个Consumer Group消费。</p>
+<img src="/2018/03/28/Kafka总结/img4" alt="img4" title="">
+<p>这是Kafka用来实现一个Topic消息的广播（发给所有的Consumer）和单播（发给某一个Consumer）的手段。一个Topic可以对应多个Consumer Group。如果需要实现广播，只要每个Consumer有一个独立的Group就可以了。要实现单播只要所有的Consumer在同一个Group里。用Consumer Group还可以将Consumer进行自由的分组而不需要多次发送消息到不同的Topic。</p>
+<p>实际上，Kafka的设计理念之一就是同时提供离线处理和实时处理。根据这一特性，可以使用Storm这种实时流处理系统对消息进行实时在线处理，同时使用Hadoop这种批处理系统进行离线处理，还可以同时将数据实时备份到另一个数据中心，只需要保证这三个操作所使用的Consumer属于不同的Consumer Group即可。下图是Kafka在Linkedin的一种简化部署示意图。</p>
+<img src="/2018/03/28/Kafka总结/img5" alt="img5" title="">
+<h3 id="Push-Vs-Pull"><a href="#Push-Vs-Pull" class="headerlink" title="Push Vs Pull"></a>Push Vs Pull</h3><p>push模式很难适应消费速率不同的消费者，因为消息发送速率是由broker决定的。push模式的目标是尽可能以最快速度传递消息，但是这样很容易造成Consumer来不及处理消息，典型的表现就是拒绝服务以及网络拥塞。而pull模式则可以根据Consumer的消费能力以适当的速率消费消息。</p>
+<p>对于Kafka而言，pull模式更合适。pull模式可简化broker的设计，Consumer可自主控制消费消息的速率，同时Consumer可以自己控制消费方式——即可批量消费也可逐条消费，同时还能选择不同的提交方式从而实现不同的传输语义。</p>
+<h3 id="Kafka-delivery-guarantee"><a href="#Kafka-delivery-guarantee" class="headerlink" title="Kafka delivery guarantee"></a>Kafka delivery guarantee</h3><p>有这么几种可能的delivery guarantee：</p>
+<ul>
+<li>At most once 消息可能会丢，但绝不会重复传输</li>
+<li>At least one 消息绝不会丢，但可能会重复传输</li>
+<li>Exactly once 每条消息肯定会被传输一次且仅传输一次，很多时候这是用户所想要的。</li>
+</ul>
+<p>当Producer向broker发送消息时，一旦这条消息被commit，因数replication的存在，它就不会丢。但是如果Producer发送数据给broker后，遇到网络问题而造成通信中断，那Producer就无法判断该条消息是否已经commit。虽然Kafka无法确定网络故障期间发生了什么，但是Producer可以生成一种类似于主键的东西，发生故障时幂等性的重试多次，这样就做到了Exactly once。截止到目前(Kafka 0.8.2版本，2015-03-04)，这一Feature还并未实现，有希望在Kafka未来的版本中实现。（所以目前默认情况下一条消息从Producer到broker是确保了At least once，可通过设置Producer异步发送实现At most once）。</p>
+<p>接下来讨论的是消息从broker到Consumer的delivery guarantee语义。（仅针对Kafka consumer high level API）。Consumer在从broker读取消息后，可以选择commit，该操作会在Zookeeper中保存该Consumer在该Partition中读取的消息的offset。该Consumer下一次再读该Partition时会从下一条开始读取。如未commit，下一次读取的开始位置会跟上一次commit之后的开始位置相同。当然可以将Consumer设置为autocommit，即Consumer一旦读到数据立即自动commit。如果只讨论这一读取消息的过程，那Kafka是确保了Exactly once。但实际使用中应用程序并非在Consumer读取完数据就结束了，而是要进行进一步处理，而数据处理与commit的顺序在很大程度上决定了消息从broker和consumer的delivery guarantee semantic。</p>
+<ul>
+<li>读完消息先commit再处理消息。这种模式下，如果Consumer在commit后还没来得及处理消息就crash了，下次重新开始工作后就无法读到刚刚已提交而未处理的消息，这就对应于At most once</li>
+<li>读完消息先处理再commit。这种模式下，如果在处理完消息之后commit之前Consumer crash了，下次重新开始工作时还会处理刚刚未commit的消息，实际上该消息已经被处理过了。这就对应于At least once。在很多使用场景下，消息都有一个主键，所以消息的处理往往具有幂等性，即多次处理这一条消息跟只处理一次是等效的，那就可以认为是Exactly once。（笔者认为这种说法比较牵强，毕竟它不是Kafka本身提供的机制，主键本身也并不能完全保证操作的幂等性。而且实际上我们说delivery guarantee 语义是讨论被处理多少次，而非处理结果怎样，因为处理方式多种多样，我们不应该把处理过程的特性——如是否幂等性，当成Kafka本身的Feature）</li>
+<li>如果一定要做到Exactly once，就需要协调offset和实际操作的输出。精典的做法是引入两阶段提交。如果能让offset和操作输入存在同一个地方，会更简洁和通用。这种方式可能更好，因为许多输出系统可能不支持两阶段提交。比如，Consumer拿到数据后可能把数据放到HDFS，如果把最新的offset和数据本身一起写到HDFS，那就可以保证数据的输出和offset的更新要么都完成，要么都不完成，间接实现Exactly once。（目前就high level API而言，offset是存于Zookeeper中的，无法存于HDFS，而low level API的offset是由自己去维护的，可以将之存于HDFS中）</li>
+</ul>
+<p>总之，Kafka默认保证At least once，并且允许通过设置Producer异步提交来实现At most once。而Exactly once要求与外部存储系统协作，幸运的是Kafka提供的offset可以非常直接非常容易得使用这种方式</p>
+<h2 id="可用性保证"><a href="#可用性保证" class="headerlink" title="可用性保证"></a>可用性保证</h2><p>在Kafka 0.8之前是没有提供可用性保证的，一单一个Broker宕机，在该Broker上存储的消息都会丢失，同时Producer也无法向该Broker发送消息，显然这与Kafka提出的delivery guarantee是相违背的。如何保证Kafka的可用性呢，Kafka通过Replication机制与Leader Election来保证Kafka的高可用性。</p>
+<h3 id="备份-Replication-机制"><a href="#备份-Replication-机制" class="headerlink" title="备份(Replication)机制"></a>备份(Replication)机制</h3><p>为了更好的做好负载均衡，我们需要将同一个topic的partion尽量部署到不同的Broker上，同时为了提高系统partion的容错性，我们需要尽量将partion的replication部署到和partion不同的Broker上。Kafka分配Replication的算法如下：</p>
+<ol>
+<li>将所有Broker（假设共n个Broker）和待分配的Partition排序</li>
+<li>将第i个Partition分配到第（i mod n）个Broker上</li>
+<li>将第i个Partition的第j个Replica分配到第（(i + j) mod n）个Broker上。</li>
+</ol>
+<p>为了提高可用性，Kafka还需要解决以下几个问题：</p>
+<ol>
+<li>数据同步：多个partion之间怎么同步数据</li>
+<li>Producer发送消息ack前需要数据同步到多少个partion才算发送成功</li>
+<li>某个Replication不工作怎么处理</li>
+<li>Replication恢复工作怎么处理</li>
+</ol>
+<h3 id="数据同步"><a href="#数据同步" class="headerlink" title="数据同步"></a>数据同步</h3><p>　　Producer在发布消息到某个Partition时，先通过Zookeeper找到该Partition的Leader，然后无论该Topic的Replication Factor为多少（也即该Partition有多少个Replica），Producer只将该消息发送到该Partition的Leader。Leader会将该消息写入其本地Log。每个Follower都从Leader pull数据。这种方式上，Follower存储的数据顺序与Leader保持一致。Follower在收到该消息并写入其Log后，向Leader发送ACK。一旦Leader收到了ISR中的所有Replica的ACK，该消息就被认为已经commit了，Leader将增加HW并且向Producer发送ACK。</p>
+<p>为了提高性能，每个Follower在接收到数据后就立马向Leader发送ACK，而非等到数据写入Log中。因此，对于已经commit的消息，Kafka只能保证它被存于多个Replica的内存中，而不能保证它们被持久化到磁盘中，也就不能完全保证异常发生后该条消息一定能被Consumer消费。但考虑到这种场景非常少见，可以认为这种方式在性能和数据持久化上做了一个比较好的平衡。在将来的版本中，Kafka会考虑提供更高的持久性。</p>
+<p>Consumer读消息也是从Leader读取，只有被commit过的消息（offset低于HW的消息）才会暴露给Consumer。</p>
+<h3 id="Leader选举"><a href="#Leader选举" class="headerlink" title="Leader选举"></a>Leader选举</h3><p>上文说明了Kafka是如何做Replication的，另外一个很重要的问题是当Leader宕机了，怎样在Follower中选举出新的Leader。因为Follower可能落后许多或者crash了，所以必须确保选择“最新”的Follower作为新的Leader。一个基本的原则就是，如果Leader不在了，新的Leader必须拥有原来的Leader commit过的所有消息。这就需要作一个折衷，如果Leader在标明一条消息被commit前等待更多的Follower确认，那在它宕机之后就有更多的Follower可以作为新的Leader，但这也会造成吞吐率的下降。</p>
+<p>Kafka在Zookeeper中动态维护了一个ISR（in-sync replicas），这个ISR里的所有Replica都跟上了leader，只有ISR里的成员才有被选为Leader的可能。在这种模式下，对于f+1个Replica，一个Partition能在保证不丢失已经commit的消息的前提下容忍f个Replica的失败。在大多数使用场景中，这种模式是非常有利的。事实上，为了容忍f个Replica的失败，Majority Vote和ISR在commit前需要等待的Replica数量是一样的，但是ISR需要的总的Replica的个数几乎是Majority Vote的一半。</p>
+<p>上文提到，在ISR中至少有一个follower时，Kafka可以确保已经commit的数据不丢失，但如果某个Partition的所有Replica都宕机了，就无法保证数据不丢失了。这种情况下有两种可行的方案：</p>
+<ul>
+<li>等待ISR中的任一个Replica“活”过来，并且选它作为Leader</li>
+<li>选择第一个“活”过来的Replica（不一定是ISR中的）作为Leader</li>
+</ul>
+<p>　　这就需要在可用性和一致性当中作出一个简单的折衷。如果一定要等待ISR中的Replica“活”过来，那不可用的时间就可能会相对较长。而且如果ISR中的所有Replica都无法“活”过来了，或者数据都丢失了，这个Partition将永远不可用。选择第一个“活”过来的Replica作为Leader，而这个Replica不是ISR中的Replica，那即使它并不保证已经包含了所有已commit的消息，它也会成为Leader而作为consumer的数据源（前文有说明，所有读写都由Leader完成）。Kafka0.8.*使用了第二种方式。根据Kafka的文档，在以后的版本中，Kafka支持用户通过配置选择这两种方式中的一种，从而根据不同的使用场景选择高可用性还是强一致性。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> 日常积累 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Kafka </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Netty In Action(六-ChannelHandler)]]></title>
       <url>/2017/10/26/Netty-In-Action-%E5%85%AD-ChannelHandler/</url>
       <content type="html"><![CDATA[<h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>  一般来说，在网络应用中接收连接发送数据还不是最重要的，最重要的应该是如何处理数据。Netty提供了ChannelHandler接口用来处理数据。同时我们可以将ChannelHandler串起来形成一个链条(filter模式)来串行处理数据，这样每一个ChannelHandler就只需要实现一部分简单的功能即可。另外我们还可以在程序运行期间对ChannelHandler进行修改。</p>
