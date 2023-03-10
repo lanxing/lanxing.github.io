@@ -1,294 +1,66 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8">
+ <title>ChatGpt自动生成游戏列表</title>
+ <style>
+  body {
+   margin: 0;
+   padding: 0;
+  }
 
+  .container {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+   grid-gap: 20px;
+   padding: 20px;
+  }
 
-    
-  <url>
-    <loc>http://lanxinglan.cn/2018/03/28/Kafka%E6%80%BB%E7%BB%93/</loc>
-    <lastmod>2018-04-20T06:45:32.000Z</lastmod>
-    <data>
-        <display>
-        <title>Kafka总结</title>
-        <pubTime>2018-03-28T09:02:46.000Z</pubTime>
-        
-        <tag>Kafka</tag>
-         
-         
-           
-             
-              <breadCrumb title="日常积累" url="http://lanxinglan.cn/categories/%E6%97%A5%E5%B8%B8%E7%A7%AF%E7%B4%AF/"/>
-          
-        </display>
-    </data>
-    </url>
+  .box {
+   background-color: #f2f2f2;
+   border: 1px solid #ccc;
+   padding: 20px;
+   text-align: center;
+  }
 
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/10/26/Netty-In-Action-%E5%85%AD-ChannelHandler/</loc>
-    <lastmod>2017-10-30T08:58:58.000Z</lastmod>
-    <data>
-        <display>
-        <title>Netty In Action(六-ChannelHandler)</title>
-        <pubTime>2017-10-26T06:46:48.000Z</pubTime>
-        
-        <tag>netty</tag>
-         
-        <tag>读书笔记</tag>
-         
-         
-           
-             
-              <breadCrumb title="读书笔记" url="http://lanxinglan.cn/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
-          
-        </display>
-    </data>
-    </url>
+  .box h2 {
+   margin-top: 0;
+  }
 
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/10/18/%E5%9C%A8Docker%E7%8E%AF%E5%A2%83%E4%B8%8B%E9%83%A8%E7%BD%B2Kafka/</loc>
-    <lastmod>2017-10-18T03:07:32.000Z</lastmod>
-    <data>
-        <display>
-        <title>在Docker环境下部署Kafka</title>
-        <pubTime>2017-10-18T02:09:51.000Z</pubTime>
-        
-        <tag>kafka</tag>
-         
-        <tag>docker</tag>
-         
-         
-           
-             
-              <breadCrumb title="Kafka" url="http://lanxinglan.cn/categories/Kafka/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/09/28/Netty-In-Action-%E4%BA%94/</loc>
-    <lastmod>2017-10-17T07:28:06.000Z</lastmod>
-    <data>
-        <display>
-        <title>Netty In Action(五-Buffers)</title>
-        <pubTime>2017-09-28T09:54:35.000Z</pubTime>
-        
-        <tag>netty</tag>
-         
-        <tag>读书笔记</tag>
-         
-         
-           
-             
-              <breadCrumb title="读书笔记" url="http://lanxinglan.cn/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/09/21/Netty-In-Action-%E5%9B%9B/</loc>
-    <lastmod>2017-09-22T04:18:07.000Z</lastmod>
-    <data>
-        <display>
-        <title>Netty In Action(四)</title>
-        <pubTime>2017-09-21T07:46:18.000Z</pubTime>
-        
-        <tag>netty</tag>
-         
-        <tag>读书笔记</tag>
-         
-         
-           
-             
-              <breadCrumb title="读书笔记" url="http://lanxinglan.cn/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/09/19/Netty-In-Action-%E4%B8%89/</loc>
-    <lastmod>2017-09-20T07:31:34.000Z</lastmod>
-    <data>
-        <display>
-        <title>Netty In Action(三)</title>
-        <pubTime>2017-09-19T07:34:15.000Z</pubTime>
-        
-        <tag>netty</tag>
-         
-        <tag>读书笔记</tag>
-         
-         
-           
-             
-              <breadCrumb title="读书笔记" url="http://lanxinglan.cn/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/09/13/Netty-In-Action-%E4%BA%8C/</loc>
-    <lastmod>2017-09-18T11:13:12.000Z</lastmod>
-    <data>
-        <display>
-        <title>Netty In Action(二)</title>
-        <pubTime>2017-09-13T09:13:03.000Z</pubTime>
-        
-        <tag>netty</tag>
-         
-        <tag>读书笔记</tag>
-         
-         
-           
-             
-              <breadCrumb title="读书笔记" url="http://lanxinglan.cn/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/09/11/Netty-in-Action-%E4%B8%80/</loc>
-    <lastmod>2017-09-13T10:05:28.000Z</lastmod>
-    <data>
-        <display>
-        <title>Netty in Action(一)</title>
-        <pubTime>2017-09-11T04:21:37.000Z</pubTime>
-        
-        <tag>netty</tag>
-         
-        <tag>读书笔记</tag>
-         
-         
-           
-             
-              <breadCrumb title="读书笔记" url="http://lanxinglan.cn/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/08/15/%E6%B5%85%E8%B0%88Java%E7%BA%BF%E7%A8%8B%E6%B1%A0/</loc>
-    <lastmod>2017-08-25T09:57:12.000Z</lastmod>
-    <data>
-        <display>
-        <title>浅谈Java线程池</title>
-        <pubTime>2017-08-15T07:28:53.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="Java" url="http://lanxinglan.cn/categories/Java/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/08/11/ScheduledThreadPoolExecutor%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</loc>
-    <lastmod>2017-08-23T04:25:15.000Z</lastmod>
-    <data>
-        <display>
-        <title>ScheduledThreadPoolExecutor源码分析</title>
-        <pubTime>2017-08-11T11:18:45.000Z</pubTime>
-        
-        <tag>Java源码</tag>
-         
-         
-           
-             
-              <breadCrumb title="Java源码分析" url="http://lanxinglan.cn/categories/Java%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/08/08/CopyOnWriteArrayList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</loc>
-    <lastmod>2017-08-23T04:21:51.000Z</lastmod>
-    <data>
-        <display>
-        <title>CopyOnWriteArrayList源码分析</title>
-        <pubTime>2017-08-08T08:21:55.000Z</pubTime>
-        
-        <tag>Java源码</tag>
-         
-         
-           
-             
-              <breadCrumb title="Java源码分析" url="http://lanxinglan.cn/categories/Java%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/08/08/String%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</loc>
-    <lastmod>2017-08-23T04:17:49.000Z</lastmod>
-    <data>
-        <display>
-        <title>String源码分析</title>
-        <pubTime>2017-08-08T02:58:56.000Z</pubTime>
-        
-        <tag>Java源码</tag>
-         
-         
-           
-             
-              <breadCrumb title="Java源码分析" url="http://lanxinglan.cn/categories/Java%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/08/08/ThreadPoolExecutor%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</loc>
-    <lastmod>2017-08-16T04:15:03.000Z</lastmod>
-    <data>
-        <display>
-        <title>ThreadPoolExecutor源码分析</title>
-        <pubTime>2017-08-08T08:41:20.000Z</pubTime>
-        
-        <tag>Java源码</tag>
-         
-         
-           
-             
-              <breadCrumb title="Java源码分析" url="http://lanxinglan.cn/categories/Java%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-    
-    
-  <url>
-    <loc>http://lanxinglan.cn/2017/08/08/hello-world/</loc>
-    <lastmod>2017-08-08T01:53:31.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hello World</title>
-        <pubTime>2017-08-08T01:53:31.000Z</pubTime>
-        
-         
-           
-        </display>
-    </data>
-    </url>
-
-</urlset>
+  .box a {
+   display: block;
+   margin-top: 10px;
+   color: #0077cc;
+   text-decoration: none;
+  }
+ </style>
+</head>
+<body>
+ <div class="container">
+  <div class="box">
+   <h2></h2>
+   <a href="./guass_sum.html">益智游戏-数字和</a >
+  </div>
+  <div class="box">
+   <h2>区域2</h2>
+   <a href="#">超链接2</a >
+  </div>
+  <div class="box">
+   <h2>区域3</h2>
+   <a href="#">超链接3</a >
+  </div>
+  <div class="box">
+   <h2>区域4</h2>
+   <a href="#">超链接4</a >
+  </div>
+  <div class="box">
+   <h2>区域5</h2>
+   <a href="#">超链接5</a >
+  </div>
+  <div class="box">
+   <h2>区域6</h2>
+   <a href="#">超链接6</a >
+  </div>
+ </div>
+</body>
+</html>
