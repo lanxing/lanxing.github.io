@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>益智游戏</title>
+</head>
+<body>
+
+<h1>益智游戏</h1>
+
+<p>这是一个简单的益智游戏。游戏规则如下：</p >
+
+<ol>
+ <li>点击开始游戏按钮开始游戏。</li>
+ <li>屏幕上会随机出现一些数字，你需要在规定时间内计算出它们的和。</li>
+ <li>输入你的答案，点击提交按钮。</li>
+ <li>如果你的答案正确，你将得到一定的积分。</li>
+ <li>游戏时间为30秒，结束后将显示你的最终得分。</li>
+</ol>
+
+<button onclick="startGame()">开始游戏</button>
+
+<p id="question"></p >
+
+<form onsubmit="return checkAnswer()">
+ <label for="answer">答案：</label>
+ <input type="text" id="answer">
+ <input type="submit" value="提交">
+</form>
+
+<p id="score"></p >
+
+<script>
+ var score = 0;
+ var timeLeft = 30;
+ var intervalId;
+
+ function startGame() {
+  // 随机生成数字
+  var numbers = [];
+  for (var i = 0; i < 5; i++) {
+   var num = Math.floor(Math.random() * 10) + 1;
+   numbers.push(num);
+  }
+
+  // 显示数字
+  var question = "计算 " + numbers.join(" + ");
+  document.getElementById("question").innerHTML = question;
+
+  // 开始计时
+  intervalId = setInterval(function() {
+   timeLeft--;
+   document.title = "剩余时间：" + timeLeft + "秒";
+   if (timeLeft <= 0) {
+    clearInterval(intervalId);
+    document.getElementById("question").innerHTML = "";
+    document.getElementById("answer").disabled = true;
+    document.getElementById("score").innerHTML = "你的得分是：" + score;
+   }
+  }, 1000);
+ }
+
+ function checkAnswer() {
+  var userAnswer = parseInt(document.getElementById("answer").value);
+  var correctAnswer = 0;
+  document.getElementById("answer").value = "";
+
+  // 计算正确答案
+  var numbers = document.getElementById("question").innerHTML.split(" ");
+  for (var i = 1; i < numbers.length; i += 2) {
+   correctAnswer += parseInt(numbers[i]);
+  }
+
+  // 检查答案是否正确
+  if (userAnswer == correctAnswer) {
+   score++;
+   document.getElementById("score").innerHTML = "得分：" + score;
+   startGame();
+  }
+
+  return false;
+ }
+</script>
+
+</body>
+</html>
