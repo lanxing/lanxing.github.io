@@ -1,0 +1,32 @@
+#game-area {
+ width: 300px;
+ height: 300px;
+ border: 1px solid black;
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ grid-template-rows: repeat(3, 1fr);
+}
+
+#game-area div {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 40px;
+ border: 1px solid black;
+ cursor: pointer;
+}
+
+#game-area div.empty {
+ background-color: white;
+}
+
+#control-area {
+ margin-top: 20px;
+}
+
+button {
+ font-size: 20px;
+ padding: 10px 20px;
+ margin-right: 10px;
+ cursor: pointer;
+}
